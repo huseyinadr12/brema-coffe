@@ -7,6 +7,83 @@ interface EspressoCup3DProps {
   position?: [number, number, number];
 }
 
+/** Soft round sprite so steam reads as vapour instead of square dots. */
+function createSoftSprite(): THREE.Texture {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  if (ctx) {
+    const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, 'rgba(255,255,255,0.9)');
+    g.addColorStop(0.35, 'rgba(255,255,255,0.35)');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+  }
+  return new THREE.CanvasTexture(canvas);
+}
+
+/**
+ * Demitasse profile revolved with a lathe: outer wall, over the rim and back
+ * down the inner wall. The old open-ended cylinder had no thickness and no
+ * interior, so the cup read as a paper tube from every angle but dead-on.
+ */
+function createCupGeometry(): THREE.BufferGeometry {
+  const profile: [number, number][] = [
+    [0.0, -0.32],
+    [0.42, -0.32],
+    [0.5, -0.3],
+    [0.55, -0.24],
+    [0.62, -0.1],
+    [0.72, 0.1],
+    [0.82, 0.34],
+    [0.89, 0.54],
+    [0.92, 0.63],
+    [0.915, 0.66],
+    [0.88, 0.665],
+    [0.855, 0.63],
+    [0.83, 0.52],
+    [0.74, 0.28],
+    [0.63, 0.02],
+    [0.52, -0.16],
+    [0.44, -0.24],
+    [0.3, -0.26],
+    [0.0, -0.26],
+  ];
+
+  const points = profile.map(([r, y]) => new THREE.Vector2(r, y));
+  const geo = new THREE.LatheGeometry(points, 96);
+  geo.computeVertexNormals();
+  return geo;
+}
+
+function createSaucerGeometry(): THREE.BufferGeometry {
+  const profile: [number, number][] = [
+    [0.0, -0.02],
+    [0.55, -0.02],
+    [0.62, 0.0],
+    [1.2, 0.05],
+    [1.46, 0.12],
+    [1.55, 0.17],
+    [1.56, 0.2],
+    [1.52, 0.2],
+    [1.42, 0.15],
+    [1.15, 0.09],
+    [0.6, 0.04],
+    [0.5, 0.02],
+    [0.5, -0.06],
+    [0.42, -0.09],
+    [0.0, -0.09],
+  ];
+  const geo = new THREE.LatheGeometry(
+    profile.map(([r, y]) => new THREE.Vector2(r, y)),
+    96
+  );
+  geo.computeVertexNormals();
+  return geo;
+}
+
 export const EspressoCup3D: React.FC<EspressoCup3DProps> = ({
   scale = 1,
   position = [0, 0, 0],
@@ -15,7 +92,11 @@ export const EspressoCup3D: React.FC<EspressoCup3DProps> = ({
   const steamRef = useRef<THREE.Points>(null);
   const cremaRef = useRef<THREE.Mesh>(null);
 
-  // 1. High-Resolution Photorealistic Tiger-Striped Espresso Crema Texture
+  const cupGeometry = useMemo(() => createCupGeometry(), []);
+  const saucerGeometry = useMemo(() => createSaucerGeometry(), []);
+  const steamSprite = useMemo(() => createSoftSprite(), []);
+
+  // Tiger-striped crema, drawn in polar space so the swirl follows the cup
   const cremaTexture = useMemo(() => {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
@@ -23,69 +104,81 @@ export const EspressoCup3D: React.FC<EspressoCup3DProps> = ({
     const ctx = canvas.getContext('2d');
 
     if (ctx) {
-      // Golden hazelnut / mahogany base
-      const grad = ctx.createRadialGradient(512, 512, 40, 512, 512, 512);
-      grad.addColorStop(0, '#EBB67D');
-      grad.addColorStop(0.35, '#D49B5B');
-      grad.addColorStop(0.7, '#8C4F23');
-      grad.addColorStop(0.92, '#4A2810');
-      grad.addColorStop(1, '#241206');
+      const grad = ctx.createRadialGradient(512, 512, 30, 512, 512, 512);
+      grad.addColorStop(0, '#E8B276');
+      grad.addColorStop(0.4, '#C98B4E');
+      grad.addColorStop(0.75, '#8C4F23');
+      grad.addColorStop(0.94, '#3E220E');
+      grad.addColorStop(1, '#1C0F05');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 1024, 1024);
 
-      // Natural irregular tiger mottling (striations & crema swirls)
+      // Swirled tiger striping: arcs that spiral out from the centre
       ctx.save();
-      for (let i = 0; i < 48; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const dist = 60 + Math.random() * 380;
-        const cx = 512 + Math.cos(angle) * dist;
-        const cy = 512 + Math.sin(angle) * dist;
-        const rw = 20 + Math.random() * 80;
-        const rh = 10 + Math.random() * 35;
-
-        const mGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, rw);
-        mGrad.addColorStop(0, 'rgba(250, 240, 225, 0.45)');
-        mGrad.addColorStop(0.6, 'rgba(212, 155, 91, 0.25)');
-        mGrad.addColorStop(1, 'transparent');
-
-        ctx.fillStyle = mGrad;
+      ctx.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < 26; i++) {
+        const startA = Math.random() * Math.PI * 2;
+        const r0 = 60 + Math.random() * 300;
         ctx.beginPath();
-        ctx.ellipse(cx, cy, rw, rh, angle + 0.5, 0, Math.PI * 2);
+        for (let s = 0; s <= 40; s++) {
+          const t = s / 40;
+          const a = startA + t * (1.2 + Math.random() * 0.02);
+          const r = r0 + t * 120;
+          const px = 512 + Math.cos(a) * r;
+          const py = 512 + Math.sin(a) * r;
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.strokeStyle = `rgba(245, 222, 190, ${0.05 + Math.random() * 0.12})`;
+        ctx.lineWidth = 10 + Math.random() * 30;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+      }
+      ctx.restore();
+
+      // Micro froth bubbles, denser toward the rim as in a real shot
+      for (let b = 0; b < 900; b++) {
+        const a = Math.random() * Math.PI * 2;
+        const r = Math.sqrt(Math.random()) * 470;
+        const bx = 512 + Math.cos(a) * r;
+        const by = 512 + Math.sin(a) * r;
+        ctx.fillStyle =
+          Math.random() > 0.45 ? 'rgba(255, 244, 228, 0.30)' : 'rgba(60, 32, 12, 0.35)';
+        ctx.beginPath();
+        ctx.arc(bx, by, Math.random() * 2.2 + 0.5, 0, Math.PI * 2);
         ctx.fill();
       }
 
-      // Microscopic glossy froth bubbles
-      for (let b = 0; b < 600; b++) {
-        const bx = Math.random() * 1024;
-        const by = Math.random() * 1024;
-        const d = Math.hypot(bx - 512, by - 512);
-        if (d < 460) {
-          ctx.fillStyle = Math.random() > 0.4 ? 'rgba(255, 255, 255, 0.35)' : 'rgba(74, 40, 16, 0.4)';
-          ctx.beginPath();
-          ctx.arc(bx, by, Math.random() * 2.5 + 0.6, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      ctx.restore();
+      // Darker meniscus ring where the crema meets the porcelain
+      const ring = ctx.createRadialGradient(512, 512, 430, 512, 512, 512);
+      ring.addColorStop(0, 'rgba(0,0,0,0)');
+      ring.addColorStop(1, 'rgba(20, 10, 4, 0.75)');
+      ctx.fillStyle = ring;
+      ctx.fillRect(0, 0, 1024, 1024);
     }
 
     const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
   }, []);
 
-  // 2. Rising Soft Steam Particle Cloud
-  const steamCount = 80;
+  const steamCount = 110;
   const steamGeo = useMemo(() => {
     const geo = new THREE.BufferGeometry();
     const pos = new Float32Array(steamCount * 3);
+    const seeds = new Float32Array(steamCount);
 
     for (let i = 0; i < steamCount; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 0.5;
-      pos[i * 3 + 1] = 0.5 + Math.random() * 1.4;
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+      const a = Math.random() * Math.PI * 2;
+      const r = Math.random() * 0.32;
+      pos[i * 3] = Math.cos(a) * r;
+      pos[i * 3 + 1] = 0.45 + Math.random() * 1.5;
+      pos[i * 3 + 2] = Math.sin(a) * r;
+      seeds[i] = Math.random() * 10;
     }
 
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geo.setAttribute('seed', new THREE.BufferAttribute(seeds, 1));
     return geo;
   }, []);
 
@@ -93,26 +186,29 @@ export const EspressoCup3D: React.FC<EspressoCup3DProps> = ({
     const t = state.clock.getElapsedTime();
 
     if (groupRef.current) {
-      groupRef.current.rotation.y = Math.sin(t * 0.35) * 0.18;
+      groupRef.current.rotation.y = Math.sin(t * 0.3) * 0.22;
     }
 
-    // Crema gentle fluid swirl
     if (cremaRef.current) {
-      cremaRef.current.rotation.z = t * 0.05;
+      cremaRef.current.rotation.z = t * 0.06;
     }
 
-    // Steam physics
     if (steamRef.current) {
       const pos = steamRef.current.geometry.attributes.position;
+      const seed = steamRef.current.geometry.attributes.seed;
+
       for (let i = 0; i < steamCount; i++) {
-        let y = pos.getY(i) + delta * 0.38;
-        let x = pos.getX(i) + Math.sin(t * 1.5 + i) * 0.002;
-        if (y > 1.9) {
-          y = 0.5;
-          x = (Math.random() - 0.5) * 0.45;
+        const s = seed.getX(i);
+        let y = pos.getY(i) + delta * (0.26 + (s % 1) * 0.22);
+        // Vapour widens and drifts as it rises
+        const spread = 1 + (y - 0.45) * 0.5;
+        const x = Math.sin(t * 0.9 + s * 3.1) * 0.06 * spread;
+        const z = Math.cos(t * 0.7 + s * 2.3) * 0.06 * spread;
+
+        if (y > 2.1) {
+          y = 0.45;
         }
-        pos.setY(i, y);
-        pos.setX(i, x);
+        pos.setXYZ(i, x + Math.cos(s * 6.28) * 0.12, y, z + Math.sin(s * 6.28) * 0.12);
       }
       pos.needsUpdate = true;
     }
@@ -120,81 +216,80 @@ export const EspressoCup3D: React.FC<EspressoCup3DProps> = ({
 
   return (
     <group ref={groupRef} position={position} scale={scale}>
-      {/* 1. Ceramic Bone Porcelain Cup Body */}
-      <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.92, 0.58, 0.92, 48, 1, true]} />
+      {/* Bone porcelain body — thin-walled lathe with a real interior */}
+      <mesh geometry={cupGeometry} castShadow receiveShadow>
         <meshPhysicalMaterial
-          color="#FAF4EB"
-          roughness={0.12}
-          metalness={0.04}
-          clearcoat={0.6}
-          clearcoatRoughness={0.1}
-          reflectivity={0.8}
+          color="#F7F1E6"
+          roughness={0.16}
+          metalness={0}
+          clearcoat={0.85}
+          clearcoatRoughness={0.08}
+          envMapIntensity={1.1}
+          sheen={0.25}
+          sheenColor={new THREE.Color('#FFE9CF')}
           side={THREE.DoubleSide}
         />
       </mesh>
 
-      {/* 2. 24K Electroplated Gold Rim Line */}
-      <mesh position={[0, 0.66, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.92, 0.025, 20, 48]} />
-        <meshStandardMaterial
-          color="#D49B5B"
-          roughness={0.12}
-          metalness={0.92}
-          envMapIntensity={2.0}
-        />
+      {/* 24K gold rim line */}
+      <mesh position={[0, 0.655, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
+        <torusGeometry args={[0.903, 0.012, 16, 96]} />
+        <meshStandardMaterial color="#E5B871" roughness={0.18} metalness={1} envMapIntensity={1.8} />
       </mesh>
 
-      {/* 3. Ceramic Demitasse Handle */}
-      <mesh position={[0.88, 0.22, 0]} rotation={[0, 0, Math.PI / 5.5]}>
-        <torusGeometry args={[0.32, 0.075, 20, 32, Math.PI * 1.1]} />
+      {/* Demitasse handle */}
+      <mesh position={[0.86, 0.24, 0]} rotation={[0, 0, Math.PI / 5.5]} castShadow>
+        <torusGeometry args={[0.3, 0.062, 24, 48, Math.PI * 1.15]} />
         <meshPhysicalMaterial
-          color="#FAF4EB"
-          roughness={0.12}
-          metalness={0.04}
-          clearcoat={0.6}
+          color="#F7F1E6"
+          roughness={0.16}
+          metalness={0}
+          clearcoat={0.85}
+          clearcoatRoughness={0.08}
+          envMapIntensity={1.1}
         />
       </mesh>
 
-      {/* 4. Ceramic Heavy Saucer Base */}
-      <mesh position={[0, -0.28, 0]} receiveShadow>
-        <cylinderGeometry args={[1.55, 1.15, 0.1, 48]} />
+      {/* Saucer */}
+      <mesh geometry={saucerGeometry} position={[0, -0.42, 0]} receiveShadow castShadow>
         <meshPhysicalMaterial
-          color="#FAF4EB"
-          roughness={0.12}
-          metalness={0.04}
-          clearcoat={0.6}
+          color="#F7F1E6"
+          roughness={0.18}
+          metalness={0}
+          clearcoat={0.8}
+          clearcoatRoughness={0.1}
+          envMapIntensity={1.0}
+          side={THREE.DoubleSide}
         />
       </mesh>
-      <mesh position={[0, -0.22, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1.52, 0.018, 16, 48]} />
-        <meshStandardMaterial
-          color="#D49B5B"
-          roughness={0.12}
-          metalness={0.92}
-        />
+      <mesh position={[0, -0.24, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.5, 0.009, 12, 96]} />
+        <meshStandardMaterial color="#E5B871" roughness={0.2} metalness={1} envMapIntensity={1.6} />
       </mesh>
 
-      {/* 5. Photorealistic Tiger-Striped Crema Liquid Surface */}
-      <mesh ref={cremaRef} position={[0, 0.52, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.84, 48]} />
+      {/* Crema surface, sunk just below the rim */}
+      <mesh ref={cremaRef} position={[0, 0.44, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <circleGeometry args={[0.815, 96]} />
         <meshPhysicalMaterial
           map={cremaTexture}
-          roughness={0.25}
-          metalness={0.08}
-          clearcoat={0.5}
-          clearcoatRoughness={0.15}
-          reflectivity={0.9}
+          roughness={0.32}
+          metalness={0}
+          clearcoat={0.7}
+          clearcoatRoughness={0.22}
+          envMapIntensity={0.7}
         />
       </mesh>
 
-      {/* 6. Rising Steam Particles */}
+      {/* Rising steam */}
       <points ref={steamRef} geometry={steamGeo}>
         <pointsMaterial
-          size={0.055}
-          color="#FAF4EB"
+          size={0.3}
+          map={steamSprite}
+          color="#FFF6EA"
           transparent
-          opacity={0.32}
+          opacity={0.16}
+          depthWrite={false}
+          sizeAttenuation
           blending={THREE.AdditiveBlending}
         />
       </points>

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { ShoppingBag, Sparkles, Check, RotateCw } from 'lucide-react';
 import { ProductPouch3D } from '../components/canvas/ProductPouch3D';
 import { PRODUCTS_DATA } from '../data/products';
 import { ProductItem, CartItem } from '../types';
 import { useCart } from '../context/CartContext';
 import { useAudio } from '../context/AudioContext';
+import { usePageJsonLd } from '../hooks/useSeo';
+import { SITE_URL } from '../data/seo';
 
 export const ProductsPage: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState<string>('all');
@@ -16,6 +18,46 @@ export const ProductsPage: React.FC = () => {
 
   const { addToCart, openSampleModal } = useCart();
   const { playClick, playDrip } = useAudio();
+
+  // Product feed for rich results: one Product node per coffee, priced from
+  // the 250 g bag, which is the size the catalogue leads with.
+  usePageJsonLd('products', {
+    '@type': 'ItemList',
+    '@id': `${SITE_URL}/urunler#catalog`,
+    name: 'Brema Coffee kahve çeşitleri',
+    numberOfItems: PRODUCTS_DATA.length,
+    itemListElement: PRODUCTS_DATA.map((product, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Product',
+        '@id': `${SITE_URL}/urunler#${product.id}`,
+        name: product.name,
+        description: product.description,
+        category: product.category,
+        brand: { '@type': 'Brand', name: 'Brema Coffee Roastery' },
+        countryOfOrigin: product.origin,
+        additionalProperty: [
+          { '@type': 'PropertyValue', name: 'Kavrum seviyesi', value: product.roastLevel },
+          {
+            '@type': 'PropertyValue',
+            name: 'Tat notaları',
+            value: product.tastingNotes.join(', '),
+          },
+          { '@type': 'PropertyValue', name: 'Yoğunluk', value: `${product.intensity}/10` },
+        ],
+        offers: {
+          '@type': 'Offer',
+          url: `${SITE_URL}/urunler`,
+          price: product.prices['250g'],
+          priceCurrency: 'TRY',
+          availability: 'https://schema.org/InStock',
+          itemCondition: 'https://schema.org/NewCondition',
+          seller: { '@id': `${SITE_URL}/#organization` },
+        },
+      },
+    })),
+  });
 
   const filteredProducts = activeCategory === 'all'
     ? PRODUCTS_DATA
@@ -36,7 +78,7 @@ export const ProductsPage: React.FC = () => {
   const currentPrice = selectedProduct.prices[selectedSize] || 280;
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-6xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -87,20 +129,21 @@ export const ProductsPage: React.FC = () => {
 
       {/* 3D Product Pouch Canvas Container */}
       <div className="max-w-6xl mx-auto h-[420px] sm:h-[480px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
-        <Canvas
-          camera={{ position: [0, 0, 4.2], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
+        <Stage3D
+          cameraPosition={[0, 0.15, 5.5]}
+          exposure={1.5}
+          shadowY={-1.55}
+          shadowScale={7}
+          shadowOpacity={0.6}
+          label={`${selectedProduct.name} kahve ambalajının 360 derece döndürülebilir 3B görünümü`}
         >
-          <ambientLight intensity={0.75} />
-          <spotLight position={[5, 8, 5]} intensity={3} color="#FFE2C2" />
-          <pointLight position={[-4, -3, -3]} intensity={1.2} color="#D49B5B" />
           <ProductPouch3D
             product={selectedProduct}
             scale={1.15}
             position={[0, 0, 0]}
             interactive={true}
           />
-        </Canvas>
+        </Stage3D>
 
         <div className="absolute top-4 left-6 pointer-events-none text-xs font-mono text-[#D49B5B] tracking-widest uppercase flex items-center gap-2 font-bold">
           <RotateCw size={14} />

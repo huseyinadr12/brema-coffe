@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { Globe, Mountain, Sun, Droplets } from 'lucide-react';
-import { EarthGlobe3D } from '../components/canvas/EarthGlobe3D';
+import { CoffeeAtlas3D } from '../components/canvas/CoffeeAtlas3D';
 import { ORIGINS_DATA } from '../data/origins';
 import { OriginData } from '../types';
 import { useAudio } from '../context/AudioContext';
@@ -11,7 +11,7 @@ export const OriginsPage: React.FC = () => {
   const { playClick } = useAudio();
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -31,21 +31,24 @@ export const OriginsPage: React.FC = () => {
       </div>
 
       {/* 3D Globe Dedicated Canvas Area */}
-      <div className="max-w-6xl mx-auto h-[480px] sm:h-[540px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
-        <Canvas
-          camera={{ position: [0, 0.4, 5.6], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
+      <div className="scene-card max-w-6xl mx-auto h-[480px] sm:h-[540px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
+        <Stage3D
+          eager
+          cameraPosition={[0, 0.4, 5.6]}
+          mood="cool"
+          exposure={1.05}
+          focusDistance={0.02}
+          bokeh={1.6}
+          shadowY={null}
+          label="Brema kahve kökenlerini gösteren interaktif 3B dünya küresi"
         >
-          <ambientLight intensity={0.75} />
-          <spotLight position={[5, 8, 5]} intensity={3} color="#FFE2C2" />
-          <pointLight position={[-6, -4, -4]} intensity={1.5} color="#D49B5B" />
-          <EarthGlobe3D
+          <CoffeeAtlas3D
             selectedOrigin={selectedOrigin}
             onSelectOrigin={setSelectedOrigin}
             scale={1.0}
             position={[0, 0, 0]}
           />
-        </Canvas>
+        </Stage3D>
 
         {/* Overlay Helper Label */}
         <div className="absolute top-4 left-6 pointer-events-none text-xs font-mono text-[#D49B5B] tracking-widest uppercase flex items-center gap-2 font-bold">

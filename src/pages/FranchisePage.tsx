@@ -29,7 +29,7 @@ export const FranchisePage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">

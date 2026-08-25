@@ -1,0 +1,3 @@
+# Cloudflare Pages provides SPA fallback automatically when no 404.html exists.
+# Keep only the legacy route so assets and route-specific HTML remain directly servable.
+/kavurmahane  /kavurma-sanati  301

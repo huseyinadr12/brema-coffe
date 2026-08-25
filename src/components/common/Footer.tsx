@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Instagram, Linkedin, ArrowUp, Check } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
+import { CONTACT } from '../../data/seo';
 
 export const Footer: React.FC = () => {
   const { playClick, playDrip } = useAudio();
@@ -112,10 +113,25 @@ export const Footer: React.FC = () => {
                 İletişim & Lokasyon
               </Link>
             </div>
-            <div className="pt-2 text-[11px] text-[#A89080] font-mono">
-              <div>İstanbul, Türkiye</div>
-              <div>info@brema.com.tr</div>
-            </div>
+            <address className="pt-2 text-[11px] text-[#A89080] font-mono not-italic">
+              <div>{CONTACT.street}</div>
+              <div>
+                {CONTACT.postalCode} {CONTACT.district} / {CONTACT.city}
+              </div>
+              <div className="mt-1">
+                <a href={`tel:${CONTACT.phone}`} className="transition-colors hover:text-[#D49B5B]">
+                  {CONTACT.phoneDisplay}
+                </a>
+              </div>
+              <div>
+                <a
+                  href={`mailto:${CONTACT.email}`}
+                  className="transition-colors hover:text-[#D49B5B]"
+                >
+                  {CONTACT.email}
+                </a>
+              </div>
+            </address>
           </div>
 
           {/* Bülten */}

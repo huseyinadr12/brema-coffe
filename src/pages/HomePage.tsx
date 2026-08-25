@@ -1,273 +1,304 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Canvas } from '@react-three/fiber';
-import { ArrowRight, Sparkles, Flame, Globe, Sliders, ShoppingBag, Award, ShieldCheck, Heart, Coffee } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowRight,
+  Building2,
+  Check,
+  Flame,
+  Globe2,
+  Leaf,
+  MousePointer2,
+  ShieldCheck,
+  ShoppingBag,
+  Sparkles,
+} from 'lucide-react';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { CoffeeBean3D } from '../components/canvas/CoffeeBean3D';
-import { EspressoCup3D } from '../components/canvas/EspressoCup3D';
 import { useAudio } from '../context/AudioContext';
+
+const qualitySteps = [
+  {
+    icon: Globe2,
+    number: '01',
+    title: 'Kökeni seçiyoruz',
+    text: 'Yalnızca karakteri belirgin, izlenebilir ve fincanda temiz sonuç veren seçkin çekirdekler.',
+    link: '/kokenler',
+    linkText: 'Kökenleri tanı',
+  },
+  {
+    icon: Flame,
+    number: '02',
+    title: 'Profilini kavuruyoruz',
+    text: 'Her çekirdeği tek bir koyulukta değil, aromasını en iyi gösterecek profilde kavuruyoruz.',
+    link: '/kavurma-sanati',
+    linkText: 'Kavurma yaklaşımı',
+  },
+  {
+    icon: ShieldCheck,
+    number: '03',
+    title: 'Tazeliği koruyoruz',
+    text: 'Küçük parti kavrum ve tek yönlü valfli paket, aromayı ilk fincandan son fincana taşır.',
+    link: '/hasattan-fincana',
+    linkText: 'Yolculuğu gör',
+  },
+];
+
+const tasteProfiles = [
+  {
+    eyebrow: 'CANLI & MEYVEMSİ',
+    title: 'Yeni tatlar arıyorum',
+    text: 'Parlak asidite, çiçeksi kokular ve meyve notaları sevenler için.',
+    accent: 'taste-card--bright',
+  },
+  {
+    eyebrow: 'DENGELİ & YUMUŞAK',
+    title: 'Her gün keyifle içerim',
+    text: 'Karamel, sütlü çikolata ve yuvarlak gövde arayanlar için.',
+    accent: 'taste-card--balanced',
+  },
+  {
+    eyebrow: 'YOĞUN & GÜÇLÜ',
+    title: 'Kahvem belirgin olsun',
+    text: 'Koyu kakao, baharat ve uzun bitiş sevenler için.',
+    accent: 'taste-card--bold',
+  },
+];
 
 export const HomePage: React.FC = () => {
   const { playClick, playDrip } = useAudio();
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20 overflow-hidden">
-      {/* Ambient warm glow lights */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-[#D49B5B]/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-3/4 right-10 w-[450px] h-[450px] bg-[#8A4F2C]/15 rounded-full blur-[120px] pointer-events-none" />
+    <div className="theme-page home-page relative min-h-screen w-full overflow-hidden px-5 pb-20 pt-24 sm:px-10 lg:px-16">
+      <div className="home-ambient home-ambient--one" aria-hidden="true" />
+      <div className="home-ambient home-ambient--two" aria-hidden="true" />
 
-      {/* HERO SECTION */}
-      <div className="max-w-6xl mx-auto min-h-[75vh] flex flex-col justify-center items-center text-center relative z-10 my-4">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#241812] border border-[#D49B5B]/35 text-xs font-mono tracking-widest text-[#D49B5B] mb-6 shadow-lg font-semibold">
-          <Sparkles size={14} />
-          <span>İSTANBUL KAHVE ATÖLYESİ · 2012'DEN BERİ</span>
-        </div>
-
-        {/* 3D Interactive Floating Bean Canvas */}
-        <div className="w-full h-72 sm:h-96 relative my-2">
-          <Canvas
-            camera={{ position: [0, 0, 3.6], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-          >
-            <ambientLight intensity={0.75} />
-            <spotLight position={[5, 6, 5]} intensity={3} color="#FFE2C2" />
-            <pointLight position={[-4, -3, -2]} intensity={1.5} color="#D49B5B" />
-            <CoffeeBean3D
-              scale={1.55}
-              position={[0, 0, 0]}
-              roastColor="#3D2518"
-              roughness={0.35}
-              metalness={0.12}
-              interactive={true}
-              floating={true}
-            />
-          </Canvas>
-        </div>
-
-        {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-8xl font-light font-display text-[#FAF4EB] tracking-tight leading-[1.08] max-w-5xl">
-          ÇEKİRDEKTEN <br />
-          <span className="italic font-editorial text-[#D49B5B] gold-glow">FİNCANA.</span>
-        </h1>
-
-        <p className="text-sm sm:text-base text-[#D9C3B0]/90 font-sans max-w-2xl mt-4 leading-relaxed">
-          Gerçek kahve lezzeti topraktan başlar. Dünyanın en iyi çiftliklerinden özenle seçtiğimiz taze çekirdekleri, İstanbul'daki atölyemizde döküm tamburlarda taze taze kavuruyoruz.
-        </p>
-
-        {/* Action CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
-          <Link
-            to="/urunler"
-            onClick={playDrip}
-            className="btn-luxury btn-luxury-primary cursor-pointer"
-            data-cursor="ÜRÜNLER"
-          >
-            <ShoppingBag size={16} />
-            <span>KAHVELERİ İNCELE</span>
-          </Link>
-
-          <Link
-            to="/kavurma-lab"
-            onClick={playClick}
-            className="btn-luxury cursor-pointer"
-            data-cursor="REHBER"
-          >
-            <Sliders size={16} />
-            <span>KAVURMA REHBERİ</span>
-          </Link>
-        </div>
-      </div>
-
-      {/* 3 BRAND PILLARS / KEY ATTRIBUTES */}
-      <div className="max-w-6xl mx-auto my-16 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="luxury-glass p-8 rounded-3xl space-y-3 border border-[#D49B5B]/30">
-          <div className="w-12 h-12 rounded-2xl bg-[#D49B5B]/15 border border-[#D49B5B]/30 flex items-center justify-center text-[#D49B5B]">
-            <Flame size={24} />
+      <section className="home-hero relative z-10 mx-auto grid min-h-[78vh] max-w-7xl items-center gap-10 py-8 lg:grid-cols-12 lg:gap-14">
+        <div className="home-hero__copy relative min-w-0 lg:col-span-6">
+          <div className="home-eyebrow mb-6">
+            <Sparkles size={14} />
+            <span>İSTANBUL'DA TAZE KAVRUM · 2012'DEN BERİ</span>
           </div>
-          <h3 className="text-xl font-normal font-display text-[#FAF4EB]">
-            Döküm Fırınlarda Taze Kavrum
-          </h3>
-          <p className="text-xs sm:text-sm text-[#D9C3B0]/80 leading-relaxed font-sans">
-            Kahvelerimiz döküm makinelerde ağır ateşte kavrulur. Çekirdekler yanmaz, içindeki doğal çikolata ve fındık aromaları tam kıvamında açığa çıkar.
-          </p>
-        </div>
 
-        <div className="luxury-glass p-8 rounded-3xl space-y-3 border border-[#D49B5B]/30">
-          <div className="w-12 h-12 rounded-2xl bg-[#D49B5B]/15 border border-[#D49B5B]/30 flex items-center justify-center text-[#D49B5B]">
-            <Award size={24} />
-          </div>
-          <h3 className="text-xl font-normal font-display text-[#FAF4EB]">
-            Sadece Olgun Kırmızı Meyveler
-          </h3>
-          <p className="text-xs sm:text-sm text-[#D9C3B0]/80 leading-relaxed font-sans">
-            Kahve meyveleri ağaçta kiraz gibi yetişir. Ham yeşil meyveler yerine yalnızca dalında tam kızarmış, şeker oranı en yüksek olan tatlı meyveler elle toplanır.
-          </p>
-        </div>
+          <h1 className="home-title max-w-3xl">
+            Taze kavrulmuş kahve,
+            <span>tam sevdiğiniz gibi.</span>
+          </h1>
 
-        <div className="luxury-glass p-8 rounded-3xl space-y-3 border border-[#D49B5B]/30">
-          <div className="w-12 h-12 rounded-2xl bg-[#D49B5B]/15 border border-[#D49B5B]/30 flex items-center justify-center text-[#D49B5B]">
-            <ShieldCheck size={24} />
-          </div>
-          <h3 className="text-xl font-normal font-display text-[#FAF4EB]">
-            Hava Geçirmez Kilitli Paket
-          </h3>
-          <p className="text-xs sm:text-sm text-[#D9C3B0]/80 leading-relaxed font-sans">
-            Taze kavrulup tek yönlü hava valfli koruyucu paketlere doldurulan çekirdekler, ilk günkü yoğun kokusunu ve zengin kremasını aylarca muhafaza eder.
-          </p>
-        </div>
-      </div>
-
-      {/* 4 DEDICATED CHAPTER PREVIEW CARDS */}
-      <div className="max-w-6xl mx-auto my-16">
-        <div className="text-center mb-10">
-          <span className="text-[10px] uppercase font-mono tracking-widest text-[#D49B5B] font-bold block mb-2">
-            DENEYİM VE BİLGİ SAYFALARI
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-light font-display text-[#FAF4EB]">
-            KAHVE DÜNYASINI KEŞFEDİN
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* Card 1 */}
-          <Link
-            to="/kokenler"
-            onClick={playClick}
-            className="luxury-glass p-6 rounded-2xl flex flex-col justify-between h-72 border border-[#D49B5B]/25 hover:border-[#D49B5B] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
-            data-cursor="KÖKENLER"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#D49B5B]/15 flex items-center justify-center text-[#D49B5B] mb-4">
-                <Globe size={20} />
-              </div>
-              <span className="text-[10px] font-mono text-[#D49B5B] tracking-widest font-bold">BÖLÜM 01</span>
-              <h3 className="text-xl font-normal font-display text-[#FAF4EB] mt-1 group-hover:text-[#D49B5B] transition-colors">
-                Dünyadan Kahveler
-              </h3>
-              <p className="text-xs text-[#D9C3B0]/75 font-sans mt-2 leading-relaxed">
-                3D Dünya küresi üzerinde Brezilya, Kolombiya, Etiyopya ve Kenya kahvelerinin lezzet farklarını keşfedin.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#D49B5B] pt-4 border-t border-white/10 font-bold">
-              <span>3D KÜREYİ AÇ</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          {/* Card 2 */}
-          <Link
-            to="/kavurma-sanati"
-            onClick={playClick}
-            className="luxury-glass p-6 rounded-2xl flex flex-col justify-between h-72 border border-[#D49B5B]/25 hover:border-[#D49B5B] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
-            data-cursor="ATÖLYE"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#D49B5B]/15 flex items-center justify-center text-[#D49B5B] mb-4">
-                <Flame size={20} />
-              </div>
-              <span className="text-[10px] font-mono text-[#D49B5B] tracking-widest font-bold">BÖLÜM 02</span>
-              <h3 className="text-xl font-normal font-display text-[#FAF4EB] mt-1 group-hover:text-[#D49B5B] transition-colors">
-                Kavurma Atölyemiz
-              </h3>
-              <p className="text-xs text-[#D9C3B0]/75 font-sans mt-2 leading-relaxed">
-                2012'den beri İstanbul'da döküm tamburlarla uyguladığımız lezzet ve ustalık anlayışımız.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#D49B5B] pt-4 border-t border-white/10 font-bold">
-              <span>ATÖLYEYİ GÖR</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          {/* Card 3 */}
-          <Link
-            to="/kavurma-lab"
-            onClick={playClick}
-            className="luxury-glass p-6 rounded-2xl flex flex-col justify-between h-72 border border-[#D49B5B]/25 hover:border-[#D49B5B] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
-            data-cursor="LAB"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#D49B5B]/15 flex items-center justify-center text-[#D49B5B] mb-4">
-                <Sliders size={20} />
-              </div>
-              <span className="text-[10px] font-mono text-[#D49B5B] tracking-widest font-bold">BÖLÜM 03</span>
-              <h3 className="text-xl font-normal font-display text-[#FAF4EB] mt-1 group-hover:text-[#D49B5B] transition-colors">
-                Kavurma Rehberi
-              </h3>
-              <p className="text-xs text-[#D9C3B0]/75 font-sans mt-2 leading-relaxed">
-                Açık, orta ve koyu kavrumda kahvenin renginin, asiditesinin ve gövdesinin nasıl değiştiğini interaktif görün.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#D49B5B] pt-4 border-t border-white/10 font-bold">
-              <span>REHBERİ BAŞLAT</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-
-          {/* Card 4 */}
-          <Link
-            to="/urunler"
-            onClick={playClick}
-            className="luxury-glass p-6 rounded-2xl flex flex-col justify-between h-72 border border-[#D49B5B]/25 hover:border-[#D49B5B] hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
-            data-cursor="ÜRÜNLER"
-          >
-            <div>
-              <div className="w-10 h-10 rounded-xl bg-[#D49B5B]/15 flex items-center justify-center text-[#D49B5B] mb-4">
-                <ShoppingBag size={20} />
-              </div>
-              <span className="text-[10px] font-mono text-[#D49B5B] tracking-widest font-bold">BÖLÜM 04</span>
-              <h3 className="text-xl font-normal font-display text-[#FAF4EB] mt-1 group-hover:text-[#D49B5B] transition-colors">
-                Brema Ürünleri
-              </h3>
-              <p className="text-xs text-[#D9C3B0]/75 font-sans mt-2 leading-relaxed">
-                360° dönebilen 3D paketimiz ile espresso çekirdekleri, geleneksel Türk kahveleri ve taze filtre kahveler.
-              </p>
-            </div>
-            <div className="flex items-center gap-2 text-xs font-mono text-[#D49B5B] pt-4 border-t border-white/10 font-bold">
-              <span>ÜRÜNLERİ İNCELE</span>
-              <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* FINALE SECTION: 3D CUP & STATEMENT */}
-      <div className="max-w-6xl mx-auto luxury-glass rounded-3xl p-8 sm:p-14 my-16 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center border border-[#D49B5B]/30">
-        <div className="lg:col-span-7 space-y-4">
-          <span className="text-xs font-mono text-[#D49B5B] tracking-widest font-bold">HER ZAMAN TAZE · KUSURSUZ FİNCAN</span>
-          <h2 className="text-3xl sm:text-5xl font-light font-display text-[#FAF4EB]">
-            HER YUDUMDA <br />
-            <span className="italic font-editorial text-[#D49B5B]">TAZE KAVRUM TAZELİĞİ.</span>
-          </h2>
-          <p className="text-xs sm:text-sm text-[#D9C3B0]/85 leading-relaxed font-sans max-w-lg">
-            Sipariş verdiğiniz an atölyemizde taze kavrulup özel kilitli hava geçirmez paketlerde size ulaşır. İlk günden son yuduma kadar zengin krema ve kalıcı lezzet.
+          <p className="home-lead mt-6 max-w-xl">
+            Kökeni belli çekirdekleri, lezzetini örten değil ortaya çıkaran profillerle
+            kavuruyoruz. Siz yalnızca nasıl bir fincan sevdiğinizi seçin.
           </p>
 
-          <div className="pt-4 flex flex-wrap gap-4">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
               to="/urunler"
               onClick={playDrip}
-              className="btn-luxury btn-luxury-primary cursor-pointer text-xs"
+              className="btn-luxury btn-luxury-primary home-primary-cta"
+              data-cursor="KAHVENİ SEÇ"
             >
-              <span>TAZE KAHVE SİPARİŞİ VER</span>
-              <ArrowRight size={14} />
+              <ShoppingBag size={17} />
+              <span>KAHVENİ SEÇ</span>
+              <ArrowRight size={16} />
             </Link>
+            <Link
+              to="/kavurma-sanati"
+              onClick={playClick}
+              className="home-text-link"
+              data-cursor="NASIL?"
+            >
+              Nasıl kavuruyoruz?
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+
+          <div className="home-proof mt-10" aria-label="Brema kalite özeti">
+            <div><strong>2012</strong><span>İstanbul'dan beri</span></div>
+            <div><strong>8</strong><span>Seçkin köken</span></div>
+            <div><strong>Taze</strong><span>Küçük parti kavrum</span></div>
           </div>
         </div>
 
-        {/* 3D Espresso Cup Area */}
-        <div className="lg:col-span-5 h-64 sm:h-72 relative">
-          <Canvas
-            camera={{ position: [0, 0.8, 3.4], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-          >
-            <ambientLight intensity={0.8} />
-            <spotLight position={[4, 6, 4]} intensity={3} color="#FFE2C2" />
-            <pointLight position={[-3, -2, -2]} intensity={1.2} color="#D49B5B" />
-            <EspressoCup3D scale={1.15} position={[0, -0.3, 0]} />
-          </Canvas>
+        <div className="relative min-w-0 lg:col-span-6">
+          <div className="scene-card home-hero-scene relative overflow-hidden rounded-[2rem]">
+            <div className="scene-label">
+              <span className="scene-label__pulse" />
+              GERÇEK ZAMANLI 3B ÇEKİRDEK
+            </div>
+            <Stage3D
+              eager
+              cameraPosition={[0, 0.1, 4.8]}
+              shadowY={-1.45}
+              shadowScale={5.2}
+              shadowOpacity={0.34}
+              mood="studio"
+              exposure={1.02}
+              label="Brema Arabica kahve çekirdeğinin interaktif 3B görünümü"
+            >
+              <CoffeeBean3D
+                scale={1.28}
+                position={[0, -0.04, 0]}
+                roastColor="#693719"
+                roughness={0.78}
+                metalness={0}
+                oiliness={0.16}
+                interactive
+                floating
+              />
+            </Stage3D>
+            <div className="scene-instruction">
+              <MousePointer2 size={15} />
+              <span>Çekirdeği tutup döndürün</span>
+            </div>
+            <div className="flavour-note flavour-note--one"><small>AROMA</small><b>Kakao</b></div>
+            <div className="flavour-note flavour-note--two"><small>DOKU</small><b>Kadifemsi</b></div>
+          </div>
         </div>
-      </div>
+
+        <a href="#neden-brema" className="home-scroll-cue" aria-label="Brema farkını keşfet">
+          <span>KEŞFET</span>
+          <ArrowDown size={15} />
+        </a>
+      </section>
+
+      <section id="neden-brema" className="marketing-section mx-auto max-w-7xl py-20 sm:py-28">
+        <div className="section-heading-grid">
+          <div>
+            <span className="section-kicker">BREMA FARKI</span>
+            <h2>İyi kahve için<br />üç net karar.</h2>
+          </div>
+          <p>
+            Karmaşık terimler yerine fincanda hissedeceğiniz sonucu anlatıyoruz.
+            Nereden geldiğini, nasıl kavrulduğunu ve nasıl taze kaldığını bilirsiniz.
+          </p>
+        </div>
+
+        <div className="quality-grid mt-12">
+          {qualitySteps.map(({ icon: Icon, number, title, text, link, linkText }) => (
+            <article key={number} className="luxury-glass depth-card">
+              <div className="depth-card__top">
+                <span>{number}</span>
+                <Icon size={22} />
+              </div>
+              <h3>{title}</h3>
+              <p>{text}</p>
+              <Link to={link} onClick={playClick}>
+                {linkText}<ArrowRight size={14} />
+              </Link>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="taste-finder mx-auto max-w-7xl overflow-hidden rounded-[2rem] px-5 py-14 sm:px-10 lg:px-14 lg:py-20">
+        <div className="taste-finder__intro">
+          <span className="section-kicker section-kicker--light">KARAR VERMEYİ KOLAYLAŞTIRDIK</span>
+          <h2>Damak zevkiniz<br />hangisine yakın?</h2>
+          <p>Teknik isimleri bilmeniz gerekmiyor. Sevdiğiniz hissi seçin, size uygun kahveleri görün.</p>
+        </div>
+
+        <div className="taste-grid mt-10">
+          {tasteProfiles.map((profile, index) => (
+            <Link
+              key={profile.eyebrow}
+              to="/urunler"
+              onClick={playDrip}
+              className={`taste-card ${profile.accent}`}
+              data-cursor="KEŞFET"
+            >
+              <span className="taste-card__number">0{index + 1}</span>
+              <div>
+                <small>{profile.eyebrow}</small>
+                <h3>{profile.title}</h3>
+                <p>{profile.text}</p>
+              </div>
+              <span className="taste-card__action">Kahveleri gör <ArrowRight size={15} /></span>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="freshness-story mx-auto my-20 grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2rem] lg:grid-cols-12 lg:gap-14">
+        <div className="scene-card freshness-system relative min-h-[430px] lg:col-span-5 lg:min-h-[560px]">
+          <div className="freshness-system__header">
+            <span>BREMA COFFEE · ÜRETİM STANDARDI</span>
+            <b>STD. 01—03</b>
+          </div>
+
+          <div className="freshness-system__stack">
+            <div className="freshness-system__step">
+              <span>01</span>
+              <div><small>KAVRUM</small><b>Küçük partilerde kontrollü profil</b></div>
+            </div>
+            <div className="freshness-system__step">
+              <span>02</span>
+              <div><small>KONTROL</small><b>Dinlendirme ve kalite onayı</b></div>
+            </div>
+            <div className="freshness-system__step">
+              <span>03</span>
+              <div><small>PAKETLEME</small><b>Tek yönlü valfle koruma</b></div>
+            </div>
+          </div>
+
+          <div className="freshness-system__footer">
+            <small>İSTANBUL · 2012'DEN BERİ</small>
+            <strong>Kontrollü süreç. Tutarlı kalite.</strong>
+          </div>
+        </div>
+
+        <div className="freshness-copy px-1 py-4 lg:col-span-7 lg:px-10">
+          <span className="section-kicker">ÜRETİM VE TAZELİK STANDARDI</span>
+          <h2>Her partide aynı<br />kalite disiplini.</h2>
+          <p>
+            Kavrum, dinlendirme, kalite kontrol ve paketleme adımlarını tek bir üretim
+            standardı içinde yönetiyor; her partiyi aynı dikkatle hazırlıyoruz.
+          </p>
+          <ul>
+            <li><Check size={16} /> Küçük partiler halinde kontrollü kavrum</li>
+            <li><Check size={16} /> Çekirdeğe özel sıcaklık ve zaman profili</li>
+            <li><Check size={16} /> Tek yönlü valfle korunan tazelik</li>
+          </ul>
+          <Link to="/hasattan-fincana" onClick={playClick} className="home-text-link mt-7">
+            Sürecin tamamını gör <ArrowRight size={15} />
+          </Link>
+        </div>
+      </section>
+
+      <section className="choice-section mx-auto max-w-7xl py-12 sm:py-20">
+        <div className="section-heading-grid">
+          <div>
+            <span className="section-kicker">SİZE UYGUN YOL</span>
+            <h2>Bir fincanla başlayın.<br />Bir markaya dönüşün.</h2>
+          </div>
+          <p>Evde iyi kahve arayanlara da Brema deneyimini büyütmek isteyen girişimcilere de net bir başlangıç sunuyoruz.</p>
+        </div>
+
+        <div className="choice-grid mt-10">
+          <Link to="/urunler" onClick={playDrip} className="choice-card choice-card--coffee">
+            <Leaf size={25} />
+            <span>EV & OFİS İÇİN</span>
+            <h3>Kendinize uygun kahveyi bulun.</h3>
+            <p>Köken, kavrum ve damak profiline göre Brema koleksiyonunu keşfedin.</p>
+            <b>Kahveleri incele <ArrowRight size={16} /></b>
+          </Link>
+          <Link to="/franchise" onClick={playClick} className="choice-card choice-card--business">
+            <Building2 size={25} />
+            <span>YATIRIM & İŞ ORTAKLIĞI</span>
+            <h3>Brema deneyimini şehrinize taşıyın.</h3>
+            <p>Marka standardı, ürün tedariği ve operasyon yaklaşımıyla franchise modelini inceleyin.</p>
+            <b>Franchise bilgisi <ArrowRight size={16} /></b>
+          </Link>
+        </div>
+      </section>
+
+      <section className="final-conversion mx-auto mt-12 max-w-7xl rounded-[2rem] px-6 py-14 text-center sm:px-12 sm:py-20">
+        <span className="section-kicker section-kicker--light">İLK FİNCANINIZI SEÇİN</span>
+        <h2>İyi kahve, doğru seçimle başlar.</h2>
+        <p>Brema koleksiyonunda damak zevkinize uygun profili birkaç dakika içinde bulun.</p>
+        <Link to="/urunler" onClick={playDrip} className="btn-luxury btn-luxury-primary mt-7">
+          <ShoppingBag size={17} /> Kahveleri keşfet <ArrowRight size={16} />
+        </Link>
+      </section>
     </div>
   );
 };

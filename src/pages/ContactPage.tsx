@@ -2,9 +2,17 @@ import React, { useState } from 'react';
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle2, Instagram, Linkedin } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { useAudio } from '../context/AudioContext';
+import { usePageJsonLd } from '../hooks/useSeo';
+import { CONTACT, SITE_URL } from '../data/seo';
 
 export const ContactPage: React.FC = () => {
   const { playDrip } = useAudio();
+
+  usePageJsonLd('contact', {
+    '@type': 'ContactPage',
+    '@id': `${SITE_URL}/iletisim#contact`,
+    mainEntity: { '@id': `${SITE_URL}/#organization` },
+  });
   const [sent, setSent] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -26,7 +34,7 @@ export const ContactPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -59,17 +67,29 @@ export const ContactPage: React.FC = () => {
                 <MapPin size={18} className="text-[#D49B5B] shrink-0 mt-0.5" />
                 <div>
                   <div className="font-semibold text-[#FAF4EB] font-display text-sm">Adres</div>
-                  <p>Brema Kahve Kavurma Atölyesi</p>
-                  <p>İstanbul, Türkiye (41.0082° K, 28.9784° D)</p>
+                  <address className="not-italic">
+                    <p>Brema Kahve Kavurma Atölyesi</p>
+                    <p>{CONTACT.street}</p>
+                    <p>
+                      {CONTACT.postalCode} {CONTACT.district} / {CONTACT.city}
+                    </p>
+                  </address>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Phone size={18} className="text-[#D49B5B] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-[#FAF4EB] font-display text-sm">Telefon & WhatsApp</div>
-                  <p>+90 (212) BREMA-CO</p>
-                  <p className="text-[11px] text-[#A89080] font-mono">Hafta içi 08:30 - 18:00</p>
+                  <div className="font-semibold text-[#FAF4EB] font-display text-sm">Telefon</div>
+                  <p>
+                    <a
+                      href={`tel:${CONTACT.phone}`}
+                      className="transition-colors hover:text-[#D49B5B]"
+                    >
+                      {CONTACT.phoneDisplay}
+                    </a>
+                  </p>
+                  <p className="text-[11px] text-[#A89080] font-mono">{CONTACT.hours}</p>
                 </div>
               </div>
 
@@ -77,17 +97,25 @@ export const ContactPage: React.FC = () => {
                 <Mail size={18} className="text-[#D49B5B] shrink-0 mt-0.5" />
                 <div>
                   <div className="font-semibold text-[#FAF4EB] font-display text-sm">E-Posta</div>
-                  <p>info@brema.com.tr</p>
-                  <p>siparis@brema.com.tr</p>
+                  <p>
+                    <a
+                      href={`mailto:${CONTACT.email}`}
+                      className="transition-colors hover:text-[#D49B5B]"
+                    >
+                      {CONTACT.email}
+                    </a>
+                  </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <Clock size={18} className="text-[#D49B5B] shrink-0 mt-0.5" />
                 <div>
-                  <div className="font-semibold text-[#FAF4EB] font-display text-sm">Kavurma & Sevkiyat</div>
-                  <p>Pazartesi - Cuma: 08:00 - 18:00</p>
-                  <p>Cumartesi: 09:00 - 14:00 (Tadım Seansları)</p>
+                  <div className="font-semibold text-[#FAF4EB] font-display text-sm">Çalışma Saatleri</div>
+                  <p>{CONTACT.hours}</p>
+                  <p className="text-[11px] text-[#A89080] font-mono">
+                    Sevkiyat ve kavurma planlaması hafta içi yapılır
+                  </p>
                 </div>
               </div>
             </div>

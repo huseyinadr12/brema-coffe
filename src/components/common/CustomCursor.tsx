@@ -1,99 +1,106 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+type CursorMode = 'default' | 'interactive';
+
+interface CursorView {
+  visible: boolean;
+  mode: CursorMode;
+}
+
+const INITIAL_VIEW: CursorView = { visible: false, mode: 'default' };
 
 export const CustomCursor: React.FC = () => {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [trailing, setTrailing] = useState({ x: -100, y: -100 });
-  const [cursorText, setCursorText] = useState('');
-  const [isHovered, setIsHovered] = useState(false);
-  const [isVisible, setIsVisible] = useState(false);
-
-  const requestRef = useRef<number | null>(null);
+  const dotRef = useRef<HTMLSpanElement>(null);
+  const ringRef = useRef<HTMLSpanElement>(null);
+  const layerRef = useRef<HTMLDivElement>(null);
+  const pointer = useRef({ x: -100, y: -100 });
+  const trailing = useRef({ x: -100, y: -100 });
+  const hasPosition = useRef(false);
+  const [view, setView] = useState<CursorView>(INITIAL_VIEW);
 
   useEffect(() => {
-    if (window.matchMedia('(pointer: coarse)').matches) {
-      return;
-    }
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (coarsePointer || reducedMotion) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      if (!isVisible) setIsVisible(true);
+    let frame = 0;
+    document.documentElement.classList.add('custom-cursor-enabled');
 
-      const target = e.target as HTMLElement | null;
-      if (target) {
-        const customAction = target.closest('[data-cursor]')?.getAttribute('data-cursor');
-        const isInteractive = target.closest('button, a, input, select, [role="button"]');
+    const updateView = (next: CursorView) => {
+      setView((current) =>
+        current.visible === next.visible &&
+        current.mode === next.mode
+          ? current
+          : next
+      );
+    };
 
-        if (customAction) {
-          setCursorText(customAction);
-          setIsHovered(true);
-        } else if (isInteractive) {
-          setCursorText('');
-          setIsHovered(true);
-        } else {
-          setCursorText('');
-          setIsHovered(false);
-        }
+    const handleMouseMove = (event: MouseEvent) => {
+      pointer.current = { x: event.clientX, y: event.clientY };
+
+      if (!hasPosition.current) {
+        trailing.current = { ...pointer.current };
+        hasPosition.current = true;
       }
+
+      if (dotRef.current) {
+        dotRef.current.style.transform = `translate3d(${event.clientX}px, ${event.clientY}px, 0) translate(-50%, -50%)`;
+      }
+
+      const target = event.target instanceof Element ? event.target : null;
+      const nativeControl = target?.closest('input, select, textarea, [contenteditable="true"]');
+      if (nativeControl) {
+        updateView({ ...INITIAL_VIEW });
+        return;
+      }
+
+      const interactive = Boolean(target?.closest('a, button, [role="button"]'));
+
+      updateView({
+        visible: true,
+        mode: interactive ? 'interactive' : 'default',
+      });
     };
 
-    const handleMouseLeave = () => {
-      setIsVisible(false);
+    const handleMouseLeave = () => updateView({ ...INITIAL_VIEW });
+    const handleMouseDown = () => layerRef.current?.classList.add('is-pressed');
+    const handleMouseUp = () => layerRef.current?.classList.remove('is-pressed');
+
+    const animate = () => {
+      trailing.current.x += (pointer.current.x - trailing.current.x) * 0.2;
+      trailing.current.y += (pointer.current.y - trailing.current.y) * 0.2;
+
+      if (ringRef.current) {
+        ringRef.current.style.transform = `translate3d(${trailing.current.x}px, ${trailing.current.y}px, 0) translate(-50%, -50%)`;
+      }
+
+      frame = requestAnimationFrame(animate);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
     document.addEventListener('mouseleave', handleMouseLeave);
+    frame = requestAnimationFrame(animate);
 
     return () => {
+      document.documentElement.classList.remove('custom-cursor-enabled');
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
       document.removeEventListener('mouseleave', handleMouseLeave);
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
+      cancelAnimationFrame(frame);
     };
-  }, [isVisible]);
-
-  useEffect(() => {
-    const followCursor = () => {
-      setTrailing((prev) => ({
-        x: prev.x + (position.x - prev.x) * 0.18,
-        y: prev.y + (position.y - prev.y) * 0.18,
-      }));
-      requestRef.current = requestAnimationFrame(followCursor);
-    };
-    requestRef.current = requestAnimationFrame(followCursor);
-    return () => {
-      if (requestRef.current) cancelAnimationFrame(requestRef.current);
-    };
-  }, [position]);
-
-  if (!isVisible) return null;
+  }, []);
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-[9998] overflow-hidden">
-      {/* Precision Center Dot */}
-      <div
-        className="fixed w-2 h-2 rounded-full bg-[#FAF4EB] -translate-x-1/2 -translate-y-1/2 transition-opacity duration-300 shadow-[0_0_10px_#D49B5B]"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          opacity: isHovered && cursorText ? 0 : 1,
-        }}
-      />
-
-      {/* Outer Trailing Ring / Pill */}
-      <div
-        className={`fixed flex items-center justify-center -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-300 ease-out ${
-          cursorText
-            ? 'px-4 py-1.5 bg-[#FAF4EB] text-[#140C08] text-[10px] font-mono font-bold tracking-[0.25em] shadow-[0_0_25px_rgba(212,155,91,0.5)] border border-[#D49B5B]'
-            : isHovered
-            ? 'w-12 h-12 border border-[#D49B5B] bg-[#D49B5B]/15 backdrop-blur-[1px]'
-            : 'w-8 h-8 border border-[#FAF4EB]/30'
-        }`}
-        style={{
-          left: `${trailing.x}px`,
-          top: `${trailing.y}px`,
-        }}
-      >
-        {cursorText && <span>{cursorText}</span>}
-      </div>
+    <div
+      ref={layerRef}
+      className={`custom-cursor ${view.visible ? 'is-visible' : ''} is-${view.mode}`}
+      aria-hidden="true"
+    >
+      <span ref={dotRef} className="custom-cursor__dot" />
+      <span ref={ringRef} className="custom-cursor__ring" />
     </div>
   );
 };

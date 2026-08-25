@@ -177,7 +177,7 @@ export const FullscreenMenu: React.FC<FullscreenMenuProps> = ({ isOpen, onClose 
             GENEL MERKEZ & KAVURMA ATÖLYESİ
           </h4>
           <p>İstanbul, Türkiye · 2012'den Beri</p>
-          <p>brema.com.tr · info@brema.com.tr</p>
+          <p>brema.com.tr · iletisim@brema.com.tr</p>
         </div>
 
         <div>
