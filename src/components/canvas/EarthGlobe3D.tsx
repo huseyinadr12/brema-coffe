@@ -1,8 +1,11 @@
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { ORIGINS_DATA } from '../../data/origins';
 import { OriginData } from '../../types';
+import { earthTextures, atmosphereMaterial } from './EarthTextures';
+import { cached } from './assetCache';
 
 interface EarthGlobe3DProps {
   selectedOrigin?: OriginData;
@@ -11,16 +14,17 @@ interface EarthGlobe3DProps {
   position?: [number, number, number];
 }
 
-// Convert Lat/Lng to 3D Sphere Coordinates
+const GLOBE_RADIUS = 2.0;
+
 export function latLngToVector3(lat: number, lng: number, radius: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lng + 180) * (Math.PI / 180);
 
-  const x = -(radius * Math.sin(phi) * Math.cos(theta));
-  const z = radius * Math.sin(phi) * Math.sin(theta);
-  const y = radius * Math.cos(phi);
-
-  return new THREE.Vector3(x, y, z);
+  return new THREE.Vector3(
+    -(radius * Math.sin(phi) * Math.cos(theta)),
+    radius * Math.cos(phi),
+    radius * Math.sin(phi) * Math.sin(theta)
+  );
 }
 
 export const EarthGlobe3D: React.FC<EarthGlobe3DProps> = ({
@@ -30,104 +34,74 @@ export const EarthGlobe3D: React.FC<EarthGlobe3DProps> = ({
   position = [0, 0, 0],
 }) => {
   const groupRef = useRef<THREE.Group>(null);
+  const cloudsRef = useRef<THREE.Mesh>(null);
+  const travellersRef = useRef<THREE.Group>(null);
   const isDragging = useRef(false);
   const previousPointerPos = useRef({ x: 0, y: 0 });
-  const targetRotation = useRef({ x: 0.2, y: -0.6 });
+  const targetRotation = useRef({ x: 0.25, y: -0.6 });
 
-  // Istanbul coordinates (Roasting Atelier destination)
-  const istanbulPos = useMemo(() => latLngToVector3(41.0082, 28.9784, 2.0), []);
+  const { map, normalMap, roughnessMap, clouds } = earthTextures();
+  const atmosphere = cached('earth:atmosphere', () => atmosphereMaterial('#6FB4F0', 3.2, 1.15));
+  const haze = cached('earth:haze', () => atmosphereMaterial('#2C6EA8', 2.0, 0.35));
 
-  // Generate Luminous Warm Earth Map Texture
-  const earthTexture = useMemo(() => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 2048;
-    canvas.height = 1024;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      // Warm ivory & sand ocean
-      ctx.fillStyle = '#EAE2D5';
-      ctx.fillRect(0, 0, 2048, 1024);
+  const istanbulPos = useMemo(() => latLngToVector3(41.0082, 28.9784, GLOBE_RADIUS), []);
 
-      // Stylized gold-caramel continental grid
-      ctx.fillStyle = '#9C673D';
-      
-      // Draw procedural landmass dots
-      for (let y = 80; y < 940; y += 14) {
-        for (let x = 60; x < 1980; x += 14) {
-          const lat = (1 - y / 512) * 90;
-          const lng = (x / 1024 - 1) * 180;
-          
-          // Approximate continental land masks
-          const inAmericas = lng > -125 && lng < -35 && lat > -55 && lat < 68;
-          const inAfrica = lng > -20 && lng < 52 && lat > -35 && lat < 36;
-          const inEurasia = lng > -10 && lng < 150 && lat > 8 && lat < 70;
-          const inAustralia = lng > 110 && lng < 155 && lat > -42 && lat < -10;
-          
-          if (inAmericas || inAfrica || inEurasia || inAustralia) {
-            ctx.beginPath();
-            ctx.arc(x, y, 4.0, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-      }
-
-      // Latitude / Longitude luxury guide rings
-      ctx.strokeStyle = 'rgba(184, 125, 59, 0.15)';
-      ctx.lineWidth = 1.5;
-      for (let latY = 128; latY < 1024; latY += 128) {
-        ctx.beginPath();
-        ctx.moveTo(0, latY);
-        ctx.lineTo(2048, latY);
-        ctx.stroke();
-      }
-    }
-    return new THREE.CanvasTexture(canvas);
-  }, []);
-
-  // Generate Flight Curves from Origins to Istanbul
   const flightCurves = useMemo(() => {
     return ORIGINS_DATA.map((origin) => {
-      const originPos = latLngToVector3(origin.lat, origin.lng, 2.0);
-      
-      // Midpoint raised into space for 3D flight arc
+      const originPos = latLngToVector3(origin.lat, origin.lng, GLOBE_RADIUS);
+
       const midPoint = new THREE.Vector3()
         .addVectors(originPos, istanbulPos)
         .multiplyScalar(0.5);
-      
+
       const distance = originPos.distanceTo(istanbulPos);
-      midPoint.normalize().multiplyScalar(2.0 + distance * 0.28);
+      midPoint.normalize().multiplyScalar(GLOBE_RADIUS + distance * 0.26);
 
       const curve = new THREE.QuadraticBezierCurve3(originPos, midPoint, istanbulPos);
-      const points = curve.getPoints(40);
-      const lineGeo = new THREE.BufferGeometry().setFromPoints(points);
 
       return {
         origin,
-        lineGeo,
-        originPos,
         curve,
+        points: curve.getPoints(64).map((p) => [p.x, p.y, p.z] as [number, number, number]),
+        originPos,
+        phase: Math.random(),
       };
     });
   }, [istanbulPos]);
 
   useFrame((state, delta) => {
-    if (!groupRef.current) return;
+    const t = state.clock.getElapsedTime();
 
-    if (!isDragging.current) {
-      targetRotation.current.y += delta * 0.12;
+    if (groupRef.current) {
+      if (!isDragging.current) {
+        targetRotation.current.y += delta * 0.055;
+      }
+
+      groupRef.current.rotation.y = THREE.MathUtils.lerp(
+        groupRef.current.rotation.y,
+        targetRotation.current.y,
+        delta * 4.0
+      );
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(
+        groupRef.current.rotation.x,
+        THREE.MathUtils.clamp(targetRotation.current.x, -0.85, 0.85),
+        delta * 4.0
+      );
     }
 
-    // Smooth inertia interpolation
-    groupRef.current.rotation.y = THREE.MathUtils.lerp(
-      groupRef.current.rotation.y,
-      targetRotation.current.y,
-      delta * 4.0
-    );
-    groupRef.current.rotation.x = THREE.MathUtils.lerp(
-      groupRef.current.rotation.x,
-      targetRotation.current.x,
-      delta * 4.0
-    );
+    // Weather drifts a little faster than the ground turns
+    if (cloudsRef.current) {
+      cloudsRef.current.rotation.y += delta * 0.012;
+    }
+
+    if (travellersRef.current) {
+      travellersRef.current.children.forEach((child, i) => {
+        const { curve, phase } = flightCurves[i];
+        const p = (t * 0.14 + phase) % 1;
+        child.position.copy(curve.getPointAt(p));
+        child.scale.setScalar(0.35 + Math.sin(p * Math.PI) * 0.9);
+      });
+    }
   });
 
   const handlePointerDown = (e: any) => {
@@ -144,11 +118,8 @@ export const EarthGlobe3D: React.FC<EarthGlobe3DProps> = ({
     const clientX = e.clientX || (e.touches && e.touches[0]?.clientX) || 0;
     const clientY = e.clientY || (e.touches && e.touches[0]?.clientY) || 0;
 
-    const deltaX = clientX - previousPointerPos.current.x;
-    const deltaY = clientY - previousPointerPos.current.y;
-
-    targetRotation.current.y += deltaX * 0.008;
-    targetRotation.current.x += deltaY * 0.008;
+    targetRotation.current.y += (clientX - previousPointerPos.current.x) * 0.007;
+    targetRotation.current.x += (clientY - previousPointerPos.current.y) * 0.007;
 
     previousPointerPos.current = { x: clientX, y: clientY };
   };
@@ -159,7 +130,6 @@ export const EarthGlobe3D: React.FC<EarthGlobe3DProps> = ({
 
   return (
     <group
-      ref={groupRef}
       scale={scale}
       position={position}
       onPointerDown={handlePointerDown}
@@ -167,68 +137,114 @@ export const EarthGlobe3D: React.FC<EarthGlobe3DProps> = ({
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
-      {/* 1. Main Luminous Earth Globe */}
-      <mesh castShadow receiveShadow>
-        <sphereGeometry args={[2.0, 64, 64]} />
-        <meshStandardMaterial
-          map={earthTexture}
-          roughness={0.7}
-          metalness={0.05}
-        />
+      {/* Outer atmospheric halo, outside the spinning group so it never smears */}
+      <mesh scale={1.16} material={haze} dispose={null}>
+        <sphereGeometry args={[GLOBE_RADIUS, 48, 48]} />
+      </mesh>
+      <mesh scale={1.035} material={atmosphere} dispose={null}>
+        <sphereGeometry args={[GLOBE_RADIUS, 64, 64]} />
       </mesh>
 
-      {/* 2. Soft Glowing Atmospheric Rim */}
-      <mesh scale={1.03}>
-        <sphereGeometry args={[2.0, 48, 48]} />
-        <meshBasicMaterial
-          color="#D9A066"
-          transparent
-          opacity={0.12}
-          side={THREE.BackSide}
-        />
-      </mesh>
+      <group ref={groupRef}>
+        {/* Planet surface: terrain albedo, elevation normals, and a roughness
+            split so the oceans catch a specular highlight and the land does not */}
+        <mesh castShadow receiveShadow>
+          <sphereGeometry args={[GLOBE_RADIUS, 128, 128]} />
+          <meshStandardMaterial
+            map={map}
+            normalMap={normalMap}
+            normalScale={new THREE.Vector2(0.85, 0.85)}
+            roughnessMap={roughnessMap}
+            roughness={1}
+            metalness={0.05}
+            envMapIntensity={0.35}
+          />
+        </mesh>
 
-      {/* 3. Istanbul Hub Pin (Center Destination) */}
-      <mesh position={istanbulPos}>
-        <sphereGeometry args={[0.06, 16, 16]} />
-        <meshBasicMaterial color="#B87D3B" />
-      </mesh>
+        {/* Cloud deck, a few kilometres up */}
+        <mesh ref={cloudsRef} scale={1.012}>
+          <sphereGeometry args={[GLOBE_RADIUS, 96, 96]} />
+          <meshStandardMaterial
+            map={clouds}
+            transparent
+            opacity={0.85}
+            roughness={0.95}
+            metalness={0}
+            depthWrite={false}
+          />
+        </mesh>
 
-      {/* 4. Flight Arcs & Origin Coordinate Markers */}
-      {flightCurves.map(({ origin, lineGeo, originPos }) => {
-        const isSelected = selectedOrigin?.id === origin.id;
-
-        return (
-          <group key={origin.id}>
-            {/* Flight Path Line */}
-            <primitive
-              object={
-                new THREE.Line(
-                  lineGeo,
-                  new THREE.LineBasicMaterial({
-                    color: isSelected ? '#B87D3B' : '#C28746',
-                    transparent: true,
-                    opacity: isSelected ? 0.9 : 0.35,
-                    linewidth: isSelected ? 2 : 1,
-                  })
-                )
-              }
+        {/* Trade routes */}
+        {flightCurves.map(({ origin, points }) => {
+          const isSelected = selectedOrigin?.id === origin.id;
+          return (
+            <Line
+              key={`arc-${origin.id}`}
+              points={points}
+              color={isSelected ? '#FFD9A8' : '#D49B5B'}
+              lineWidth={isSelected ? 2.4 : 1.1}
+              transparent
+              opacity={isSelected ? 0.95 : 0.4}
+              depthWrite={false}
             />
+          );
+        })}
 
-            {/* Interactive Origin Marker */}
-            <mesh
-              position={originPos}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (onSelectOrigin) onSelectOrigin(origin);
-              }}
-            >
-              <sphereGeometry args={[isSelected ? 0.08 : 0.05, 16, 16]} />
-              <meshBasicMaterial color={isSelected ? '#B87D3B' : origin.color} />
+        <group ref={travellersRef}>
+          {flightCurves.map(({ origin }) => (
+            <mesh key={`traveller-${origin.id}`}>
+              <sphereGeometry args={[0.032, 10, 10]} />
+              <meshBasicMaterial color="#FFE9CC" transparent opacity={0.95} />
             </mesh>
-          </group>
-        );
-      })}
+          ))}
+        </group>
+
+        {/* İstanbul — the roastery */}
+        <group position={istanbulPos}>
+          <mesh>
+            <sphereGeometry args={[0.05, 20, 20]} />
+            <meshBasicMaterial color="#FFF6E8" />
+          </mesh>
+          <mesh>
+            <sphereGeometry args={[0.12, 20, 20]} />
+            <meshBasicMaterial color="#D49B5B" transparent opacity={0.3} depthWrite={false} />
+          </mesh>
+        </group>
+
+        {/* Origin markers */}
+        {flightCurves.map(({ origin, originPos }) => {
+          const isSelected = selectedOrigin?.id === origin.id;
+          return (
+            <group key={`pin-${origin.id}`} position={originPos}>
+              <mesh
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onSelectOrigin?.(origin);
+                }}
+                onPointerOver={(e) => {
+                  e.stopPropagation();
+                  document.body.style.cursor = 'pointer';
+                }}
+                onPointerOut={() => {
+                  document.body.style.cursor = '';
+                }}
+              >
+                <sphereGeometry args={[isSelected ? 0.075 : 0.05, 16, 16]} />
+                <meshBasicMaterial color={isSelected ? '#FFE9CC' : origin.color} />
+              </mesh>
+              <mesh>
+                <sphereGeometry args={[isSelected ? 0.18 : 0.11, 16, 16]} />
+                <meshBasicMaterial
+                  color={isSelected ? '#FFD9A8' : origin.color}
+                  transparent
+                  opacity={isSelected ? 0.32 : 0.16}
+                  depthWrite={false}
+                />
+              </mesh>
+            </group>
+          );
+        })}
+      </group>
     </group>
   );
 };

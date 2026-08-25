@@ -27,7 +27,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
   const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 px-6 sm:px-12 py-5 flex items-center justify-between pointer-events-none transition-all duration-500 bg-gradient-to-b from-[#1A120E]/95 via-[#1A120E]/70 to-transparent">
+    <header className="fixed top-0 left-0 w-full z-50 px-4 sm:px-12 py-5 flex items-center justify-between pointer-events-none transition-all duration-500 bg-gradient-to-b from-[#1A120E]/95 via-[#1A120E]/70 to-transparent">
       {/* Brand Logo (Left) */}
       <Link
         to="/"
@@ -74,7 +74,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
         {/* Sound Toggle */}
         <button
           onClick={toggleAudio}
-          className={`flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 backdrop-blur-md cursor-pointer ${
+          className={`hidden sm:flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 backdrop-blur-md cursor-pointer ${
             isPlaying
               ? 'bg-[#D49B5B]/20 border-[#D49B5B] text-[#FAF4EB] shadow-[0_0_15px_rgba(212,155,91,0.35)]'
               : 'bg-[#241812]/90 border-white/10 text-[#D9C3B0] hover:text-white hover:border-[#D49B5B]'

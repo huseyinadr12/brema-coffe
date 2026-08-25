@@ -1,11 +1,11 @@
 import React from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { Flame, Gauge, Zap, Award, ShieldCheck, Heart, Coffee } from 'lucide-react';
-import { RoasterDrum3D } from '../components/canvas/RoasterDrum3D';
+import { RoastingStudio3D } from '../components/canvas/RoastingStudio3D';
 
 export const RoasteryPage: React.FC = () => {
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -25,20 +25,22 @@ export const RoasteryPage: React.FC = () => {
       </div>
 
       {/* 3D Roaster Drum Canvas Container */}
-      <div className="max-w-6xl mx-auto h-[460px] sm:h-[520px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
-        <Canvas
-          camera={{ position: [0, 0, 4.2], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
+      <div className="scene-card max-w-6xl mx-auto h-[460px] sm:h-[520px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
+        <Stage3D
+          eager
+          cameraPosition={[0, 0.25, 7.2]}
+          mood="roastery"
+          shadowY={-1.9}
+          shadowScale={9}
+          shadowOpacity={0.55}
+          label="Brema atölyesindeki tamburlu kahve kavurma makinesinin 3B görünümü"
         >
-          <ambientLight intensity={0.7} />
-          <spotLight position={[5, 8, 5]} intensity={3} color="#FFE2C2" />
-          <pointLight position={[-4, -3, -3]} intensity={1.5} color="#FF7A00" />
-          <RoasterDrum3D intensity={1.2} scale={1.15} position={[0, 0, 0]} />
-        </Canvas>
+          <RoastingStudio3D intensity={1.05} scale={0.88} position={[0, 0.05, 0]} />
+        </Stage3D>
 
         <div className="absolute top-4 left-6 pointer-events-none text-xs font-mono text-[#D49B5B] tracking-widest uppercase flex items-center gap-2 font-bold">
           <Flame size={14} />
-          <span>İNTERAKTİF DÖKÜM KAVURMA TAMBURU</span>
+          <span>BREMA TAMBURLU KAVURMA SİSTEMİ · CANLI KAVRUM</span>
         </div>
       </div>
 

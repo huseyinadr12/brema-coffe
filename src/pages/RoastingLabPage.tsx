@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { Sliders, Activity, Thermometer, Wind, RotateCw, Sparkles } from 'lucide-react';
 import { CoffeeBean3D } from '../components/canvas/CoffeeBean3D';
 import { ROAST_STAGES, ROAST_PRESETS } from '../data/roastingProfiles';
@@ -32,7 +32,7 @@ export const RoastingLabPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20">
       {/* Header */}
       <div className="max-w-5xl mx-auto mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -54,23 +54,24 @@ export const RoastingLabPage: React.FC = () => {
 
       {/* 3D Bean Live Shader Canvas */}
       <div className="max-w-6xl mx-auto h-[400px] sm:h-[460px] luxury-glass rounded-3xl relative overflow-hidden border border-[#D49B5B]/25 my-6">
-        <Canvas
-          camera={{ position: [0, 0, 3.8], fov: 45 }}
-          gl={{ antialias: true, alpha: true }}
+        <Stage3D
+          cameraPosition={[0, 0, 4.3]}
+          mood="studio"
+          shadowY={-1.5}
+          shadowScale={6}
+          shadowOpacity={0.45}
+          label={`${activeStage.name} kavrum seviyesindeki kahve çekirdeğinin canlı 3B görünümü`}
         >
-          <ambientLight intensity={0.75} />
-          <spotLight position={[4, 6, 4]} intensity={3} color="#FFE2C2" />
-          <pointLight position={[-4, -3, -3]} intensity={1.5} color="#D49B5B" />
           <CoffeeBean3D
-            scale={1.4}
+            scale={1.05}
             position={[0, 0, 0]}
             roastColor={activeStage.beanColor}
             roughness={activeStage.beanRoughness}
-            metalness={activeStage.beanGloss * 0.3}
+            metalness={0}
             interactive={true}
             floating={true}
           />
-        </Canvas>
+        </Stage3D>
 
         <div className="absolute top-4 left-6 pointer-events-none text-xs font-mono text-[#D49B5B] tracking-widest uppercase flex items-center gap-2 font-bold">
           <Sparkles size={14} />

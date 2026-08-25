@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Canvas } from '@react-three/fiber';
+import { Stage3D } from '../components/canvas/Stage3D';
 import { ArrowRight, Sparkles, Flame, Globe, Sliders, ShoppingBag, Award, ShieldCheck, Heart, Coffee } from 'lucide-react';
 import { CoffeeBean3D } from '../components/canvas/CoffeeBean3D';
 import { EspressoCup3D } from '../components/canvas/EspressoCup3D';
@@ -10,73 +10,105 @@ export const HomePage: React.FC = () => {
   const { playClick, playDrip } = useAudio();
 
   return (
-    <div className="relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20 overflow-hidden">
+    <div className="theme-page relative min-h-screen w-full bg-[#1A120E] text-[#FAF4EB] pt-24 pb-20 px-6 sm:px-12 lg:px-20 overflow-hidden">
       {/* Ambient warm glow lights */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-[#D49B5B]/15 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-3/4 right-10 w-[450px] h-[450px] bg-[#8A4F2C]/15 rounded-full blur-[120px] pointer-events-none" />
 
       {/* HERO SECTION */}
-      <div className="max-w-6xl mx-auto min-h-[75vh] flex flex-col justify-center items-center text-center relative z-10 my-4">
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-[#241812] border border-[#D49B5B]/35 text-xs font-mono tracking-widest text-[#D49B5B] mb-6 shadow-lg font-semibold">
-          <Sparkles size={14} />
-          <span>İSTANBUL KAHVE ATÖLYESİ · 2012'DEN BERİ</span>
+      <section className="relative z-10 mx-auto grid min-h-[76vh] w-full min-w-0 max-w-7xl items-center gap-10 py-10 lg:grid-cols-12 lg:gap-16">
+        <div className="order-1 min-w-0 lg:col-span-6">
+          <div className="mb-7 inline-flex items-center gap-2.5 rounded-full border border-[#D49B5B]/35 bg-white/70 px-4 py-2 text-[10px] font-bold tracking-[0.24em] text-[#D49B5B] shadow-sm backdrop-blur-md sm:text-xs">
+            <Sparkles size={14} />
+            <span>İSTANBUL'DA TAZE KAVRUM · 2012'DEN BERİ</span>
+          </div>
+
+          <h1 className="max-w-full break-words font-display text-[2.8rem] font-medium leading-[0.98] tracking-[-0.045em] text-[#FAF4EB] sm:max-w-3xl sm:text-7xl lg:text-[6.4rem]">
+            İYİ KAHVE,
+            <span className="mt-2 block font-editorial text-[#D49B5B] italic">
+              iyi bir kökenle başlar.
+            </span>
+          </h1>
+
+          <p className="mt-7 max-w-xl font-sans text-base leading-relaxed text-[#D9C3B0]/90 sm:text-lg">
+            Seçkin çiftliklerden gelen çekirdekleri İstanbul'daki atölyemizde küçük
+            partiler halinde kavuruyor; fincanınıza temiz, dengeli ve taze bir lezzet
+            olarak ulaştırıyoruz.
+          </p>
+
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <Link
+              to="/urunler"
+              onClick={playDrip}
+              className="btn-luxury btn-luxury-primary cursor-pointer"
+              data-cursor="ÜRÜNLER"
+            >
+              <ShoppingBag size={16} />
+              <span>KAHVELERİ KEŞFET</span>
+            </Link>
+
+            <Link
+              to="/kokenler"
+              onClick={playClick}
+              className="btn-luxury cursor-pointer"
+              data-cursor="KÖKENLER"
+            >
+              <Globe size={16} />
+              <span>KÖKENLERİ İNCELE</span>
+            </Link>
+          </div>
+
+          <div className="mt-10 grid max-w-xl grid-cols-3 gap-4 border-t border-[#D49B5B]/20 pt-6">
+            <div>
+              <strong className="block font-display text-2xl text-[#D49B5B]">2012</strong>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D9C3B0]">İstanbul</span>
+            </div>
+            <div>
+              <strong className="block font-display text-2xl text-[#D49B5B]">8</strong>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D9C3B0]">Seçkin köken</span>
+            </div>
+            <div>
+              <strong className="block font-display text-2xl text-[#D49B5B]">Taze</strong>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#D9C3B0]">Küçük parti</span>
+            </div>
+          </div>
         </div>
 
-        {/* 3D Interactive Floating Bean Canvas */}
-        <div className="w-full h-72 sm:h-96 relative my-2">
-          <Canvas
-            camera={{ position: [0, 0, 3.6], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
-          >
-            <ambientLight intensity={0.75} />
-            <spotLight position={[5, 6, 5]} intensity={3} color="#FFE2C2" />
-            <pointLight position={[-4, -3, -2]} intensity={1.5} color="#D49B5B" />
-            <CoffeeBean3D
-              scale={1.55}
-              position={[0, 0, 0]}
-              roastColor="#3D2518"
-              roughness={0.35}
-              metalness={0.12}
-              interactive={true}
-              floating={true}
-            />
-          </Canvas>
+        <div className="order-2 min-w-0 lg:col-span-6">
+          <div className="scene-card relative h-[390px] overflow-hidden rounded-[2.25rem] sm:h-[520px]">
+            <div className="absolute left-6 top-6 z-10 rounded-full border border-white/15 bg-black/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#FAF4EB] backdrop-blur-md">
+              Arabica · Etkileşimli görünüm
+            </div>
+            <Stage3D
+              eager
+              cameraPosition={[0, 0.1, 4.8]}
+              shadowY={-1.45}
+              shadowScale={5.2}
+              shadowOpacity={0.34}
+              mood="studio"
+              exposure={0.9}
+              label="Brema Arabica kahve çekirdeğinin interaktif 3B görünümü"
+            >
+              <CoffeeBean3D
+                scale={1.28}
+                position={[0, -0.04, 0]}
+                roastColor="#4A281A"
+                roughness={0.78}
+                metalness={0}
+                oiliness={0.16}
+                interactive
+                floating
+              />
+            </Stage3D>
+            <div className="pointer-events-none absolute bottom-6 left-6 right-6 flex items-end justify-between text-[#FAF4EB]">
+              <p className="max-w-[18rem] text-xs leading-relaxed text-white/70">
+                Çekirdeği sürükleyerek kavrum yüzeyini ve doğal merkez çizgisini inceleyin.
+              </p>
+              <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-[#D49B5B] sm:block">Sürükle ↗</span>
+            </div>
+          </div>
         </div>
-
-        {/* Main Headline */}
-        <h1 className="text-4xl sm:text-6xl md:text-8xl font-light font-display text-[#FAF4EB] tracking-tight leading-[1.08] max-w-5xl">
-          ÇEKİRDEKTEN <br />
-          <span className="italic font-editorial text-[#D49B5B] gold-glow">FİNCANA.</span>
-        </h1>
-
-        <p className="text-sm sm:text-base text-[#D9C3B0]/90 font-sans max-w-2xl mt-4 leading-relaxed">
-          Gerçek kahve lezzeti topraktan başlar. Dünyanın en iyi çiftliklerinden özenle seçtiğimiz taze çekirdekleri, İstanbul'daki atölyemizde döküm tamburlarda taze taze kavuruyoruz.
-        </p>
-
-        {/* Action CTAs */}
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
-          <Link
-            to="/urunler"
-            onClick={playDrip}
-            className="btn-luxury btn-luxury-primary cursor-pointer"
-            data-cursor="ÜRÜNLER"
-          >
-            <ShoppingBag size={16} />
-            <span>KAHVELERİ İNCELE</span>
-          </Link>
-
-          <Link
-            to="/kavurma-lab"
-            onClick={playClick}
-            className="btn-luxury cursor-pointer"
-            data-cursor="REHBER"
-          >
-            <Sliders size={16} />
-            <span>KAVURMA REHBERİ</span>
-          </Link>
-        </div>
-      </div>
+      </section>
 
       {/* 3 BRAND PILLARS / KEY ATTRIBUTES */}
       <div className="max-w-6xl mx-auto my-16 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -257,15 +289,15 @@ export const HomePage: React.FC = () => {
 
         {/* 3D Espresso Cup Area */}
         <div className="lg:col-span-5 h-64 sm:h-72 relative">
-          <Canvas
-            camera={{ position: [0, 0.8, 3.4], fov: 45 }}
-            gl={{ antialias: true, alpha: true }}
+          <Stage3D
+            cameraPosition={[0, 1.0, 3.4]}
+            shadowY={-0.92}
+            shadowScale={5}
+            shadowOpacity={0.55}
+            label="Kremalı Brema espressosunun 3B fincan görünümü"
           >
-            <ambientLight intensity={0.8} />
-            <spotLight position={[4, 6, 4]} intensity={3} color="#FFE2C2" />
-            <pointLight position={[-3, -2, -2]} intensity={1.2} color="#D49B5B" />
             <EspressoCup3D scale={1.15} position={[0, -0.3, 0]} />
-          </Canvas>
+          </Stage3D>
         </div>
       </div>
     </div>

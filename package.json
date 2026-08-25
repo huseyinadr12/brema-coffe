@@ -6,16 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "postbuild": "node scripts/generate-seo-pages.mjs",
+    "preview": "vite preview",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name=brema-coffee --branch=main"
   },
   "dependencies": {
     "@react-three/drei": "^9.117.3",
     "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.19.1",
     "canvas-confetti": "^1.9.4",
     "clsx": "^2.1.1",
     "gsap": "^3.12.5",
     "lenis": "^1.1.18",
     "lucide-react": "^0.460.0",
+    "postprocessing": "^6.39.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^7.18.2",
