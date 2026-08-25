@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Volume2, VolumeX, ShoppingBag, Menu, X } from 'lucide-react';
+import { ShoppingBag, Menu, X } from 'lucide-react';
 import { useAudio } from '../../context/AudioContext';
 import { useCart } from '../../context/CartContext';
 
@@ -10,11 +10,10 @@ interface NavigationProps {
 }
 
 const NAV_LINKS = [
-  { path: '/', label: 'ANA SAYFA' },
+  { path: '/urunler', label: 'ÜRÜNLER' },
   { path: '/kokenler', label: 'KÖKENLER' },
   { path: '/kavurma-sanati', label: 'KAVURMA SANATI' },
   { path: '/kavurma-lab', label: 'KAVURMA LAB' },
-  { path: '/urunler', label: 'ÜRÜNLERİMİZ' },
   { path: '/hasattan-fincana', label: 'HASATTAN FİNCANA' },
   { path: '/hikayemiz', label: 'HİKAYEMİZ' },
   { path: '/franchise', label: 'FRANCHISE' },
@@ -22,12 +21,12 @@ const NAV_LINKS = [
 ];
 
 export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }) => {
-  const { isPlaying, toggleAudio, playClick } = useAudio();
+  const { playClick } = useAudio();
   const { totalItems, openCart } = useCart();
   const location = useLocation();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 px-4 sm:px-12 py-5 flex items-center justify-between pointer-events-none transition-all duration-500 bg-gradient-to-b from-[#1A120E]/95 via-[#1A120E]/70 to-transparent">
+    <header className="site-header fixed left-0 top-0 z-50 flex w-full items-center justify-between px-4 py-4 pointer-events-none transition-all duration-500 sm:px-8 lg:px-12">
       {/* Brand Logo (Left) */}
       <Link
         to="/"
@@ -44,7 +43,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
       </Link>
 
       {/* Direct Page Navigation Links (Center Desktop) */}
-      <nav className="hidden xl:flex items-center gap-5 px-6 py-2.5 rounded-full bg-[#241812]/90 backdrop-blur-md border border-[#D49B5B]/30 pointer-events-auto shadow-2xl">
+      <nav className="site-nav hidden xl:flex items-center gap-3 px-5 py-3 rounded-full pointer-events-auto">
         {NAV_LINKS.map((item) => {
           const isActive = location.pathname === item.path;
 
@@ -53,7 +52,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
               key={item.path}
               to={item.path}
               onClick={playClick}
-              className={`text-[11px] tracking-[0.2em] font-mono transition-all duration-300 relative py-1 focus:outline-none cursor-pointer ${
+              className={`whitespace-nowrap text-[11px] tracking-[0.08em] font-mono transition-all duration-300 relative py-1 focus:outline-none cursor-pointer ${
                 isActive
                   ? 'text-[#FAF4EB] font-bold'
                   : 'text-[#D9C3B0]/70 hover:text-[#FAF4EB]'
@@ -70,21 +69,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
       </nav>
 
       {/* Action Controls (Right) */}
-      <div className="flex items-center gap-3 sm:gap-4 pointer-events-auto">
-        {/* Sound Toggle */}
-        <button
-          onClick={toggleAudio}
-          className={`hidden sm:flex items-center justify-center w-10 h-10 rounded-full border transition-all duration-300 backdrop-blur-md cursor-pointer ${
-            isPlaying
-              ? 'bg-[#D49B5B]/20 border-[#D49B5B] text-[#FAF4EB] shadow-[0_0_15px_rgba(212,155,91,0.35)]'
-              : 'bg-[#241812]/90 border-white/10 text-[#D9C3B0] hover:text-white hover:border-[#D49B5B]'
-          }`}
-          title={isPlaying ? 'Sesi Kapat' : 'Atölye Sesini Aç'}
-          data-cursor="SES"
-        >
-          {isPlaying ? <Volume2 size={16} className="text-[#D49B5B]" /> : <VolumeX size={16} />}
-        </button>
-
+      <div className="flex items-center gap-2.5 sm:gap-3 pointer-events-auto">
         {/* Cart Button */}
         <button
           onClick={() => {

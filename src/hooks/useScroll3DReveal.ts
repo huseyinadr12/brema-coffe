@@ -31,6 +31,9 @@ export function useScroll3DReveal(routeKey: string) {
       root.querySelectorAll<HTMLElement>('.scene-card').forEach((node) => {
         candidates.set(node, 'scene');
       });
+      root.querySelectorAll<HTMLElement>('.taste-card, .choice-card').forEach((node) => {
+        candidates.set(node, 'card');
+      });
 
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
