@@ -43,7 +43,7 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
       </Link>
 
       {/* Direct Page Navigation Links (Center Desktop) */}
-      <nav className="site-nav hidden xl:flex items-center gap-3 px-5 py-3 rounded-full pointer-events-auto">
+      <nav className="site-nav hidden xl:flex items-center rounded-full pointer-events-auto">
         {NAV_LINKS.map((item) => {
           const isActive = location.pathname === item.path;
 
@@ -52,17 +52,10 @@ export const Navigation: React.FC<NavigationProps> = ({ menuOpen, onToggleMenu }
               key={item.path}
               to={item.path}
               onClick={playClick}
-              className={`whitespace-nowrap text-[11px] tracking-[0.08em] font-mono transition-all duration-300 relative py-1 focus:outline-none cursor-pointer ${
-                isActive
-                  ? 'text-[#FAF4EB] font-bold'
-                  : 'text-[#D9C3B0]/70 hover:text-[#FAF4EB]'
-              }`}
-              data-cursor="SAYFA"
+              className={`site-nav__link ${isActive ? 'is-active' : ''}`}
+              aria-current={isActive ? 'page' : undefined}
             >
               {item.label}
-              {isActive && (
-                <span className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#D49B5B] to-[#FAF4EB] rounded-full shadow-[0_0_8px_#D49B5B]" />
-              )}
             </Link>
           );
         })}
