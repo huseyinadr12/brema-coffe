@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Location, useLocation } from 'react-router-dom';
 import { useCoffeeReveal } from '../../hooks/useCoffeeReveal';
+import { useScroll3DReveal } from '../../hooks/useScroll3DReveal';
 
 interface SmoothRouteTransitionProps {
   children: (location: Location) => React.ReactNode;
@@ -9,11 +10,8 @@ interface SmoothRouteTransitionProps {
 type Phase = 'idle' | 'leaving' | 'entering';
 
 /**
- * A deliberately light route transition.
- *
- * The previous full-screen coffee pour animated several SVGs while the next
- * WebGL scene compiled. This transition only animates opacity and transform,
- * leaving the compositor free to keep navigation responsive.
+ * A CSS-composited perspective transition. It stays visually substantial
+ * without competing with the WebGL scenes for the main thread.
  */
 export const SmoothRouteTransition: React.FC<SmoothRouteTransitionProps> = ({ children }) => {
   const location = useLocation();
@@ -23,6 +21,7 @@ export const SmoothRouteTransition: React.FC<SmoothRouteTransitionProps> = ({ ch
   const timers = useRef<number[]>([]);
 
   useCoffeeReveal(displayed.pathname);
+  useScroll3DReveal(displayed.pathname);
 
   useEffect(() => {
     if (location.pathname === activePath.current) return;
@@ -31,8 +30,8 @@ export const SmoothRouteTransition: React.FC<SmoothRouteTransitionProps> = ({ ch
     timers.current = [];
 
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const leaveDuration = reduced ? 0 : 120;
-    const enterDuration = reduced ? 0 : 300;
+    const leaveDuration = reduced ? 0 : 320;
+    const enterDuration = reduced ? 0 : 520;
 
     setPhase('leaving');
 
@@ -56,9 +55,20 @@ export const SmoothRouteTransition: React.FC<SmoothRouteTransitionProps> = ({ ch
   }, [location]);
 
   return (
-    <div className={`route-stage route-stage--${phase}`}>
-      <div className="route-progress" aria-hidden="true" />
-      {children(displayed)}
-    </div>
+    <>
+      <div className={`route-stage route-stage--${phase}`}>
+        {children(displayed)}
+      </div>
+
+      <div className={`route-veil route-veil--${phase}`} aria-hidden="true">
+        <div className="route-veil__panel route-veil__panel--left" />
+        <div className="route-veil__panel route-veil__panel--right" />
+        <div className="route-veil__mark">
+          <span>BREMA</span>
+          <small>ÇEKİRDEKTEN FİNCANA</small>
+        </div>
+        <div className="route-progress" />
+      </div>
+    </>
   );
 };
