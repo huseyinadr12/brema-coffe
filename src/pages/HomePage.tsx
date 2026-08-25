@@ -74,7 +74,7 @@ export const HomePage: React.FC = () => {
       <div className="home-ambient home-ambient--two" aria-hidden="true" />
 
       <section className="home-hero relative z-10 mx-auto grid min-h-[78vh] max-w-7xl items-center gap-10 py-8 lg:grid-cols-12 lg:gap-14">
-        <div className="min-w-0 lg:col-span-6">
+        <div className="home-hero__copy relative min-w-0 lg:col-span-6">
           <div className="home-eyebrow mb-6">
             <Sparkles size={14} />
             <span>İSTANBUL'DA TAZE KAVRUM · 2012'DEN BERİ</span>
@@ -132,13 +132,13 @@ export const HomePage: React.FC = () => {
               shadowScale={5.2}
               shadowOpacity={0.34}
               mood="studio"
-              exposure={0.9}
+              exposure={1.02}
               label="Brema Arabica kahve çekirdeğinin interaktif 3B görünümü"
             >
               <CoffeeBean3D
                 scale={1.28}
                 position={[0, -0.04, 0]}
-                roastColor="#4A281A"
+                roastColor="#693719"
                 roughness={0.78}
                 metalness={0}
                 oiliness={0.16}
