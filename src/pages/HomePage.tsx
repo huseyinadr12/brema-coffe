@@ -232,17 +232,20 @@ export const HomePage: React.FC = () => {
             <EspressoCup3D scale={1.15} position={[0, -0.3, 0]} />
           </Stage3D>
           <div className="freshness-scene__caption">
-            <span>3B FİNCAN DENEYİMİ</span>
-            <b>Sonuç fincanda görünür.</b>
+            <span>ÖRNEK FİNCAN PROFİLİ</span>
+            <div className="freshness-scene__profile">
+              <small>ORTA KAVRUM</small>
+              <b>Çikolata · Karamel · Dengeli gövde</b>
+            </div>
           </div>
         </div>
 
         <div className="freshness-copy px-1 py-4 lg:col-span-7 lg:px-10">
-          <span className="section-kicker">TAZELİK BİR SÖZ DEĞİL, SÜREÇTİR</span>
-          <h2>Kavrumdan fincana<br />aromayı koruyoruz.</h2>
+          <span className="section-kicker">TAZELİĞİ TESADÜFE BIRAKMIYORUZ</span>
+          <h2>Aromayı kavuruyor,<br />tazeliği mühürlüyoruz.</h2>
           <p>
-            Çekirdeğin karakterini doğru kavrumla açığa çıkarıyor, oksijenle temasını
-            sınırlayan valfli paketle size ulaştırıyoruz.
+            İyi çekirdek doğru kavrulmadığında, doğru kavrum da iyi korunmadığında
+            lezzet fincana ulaşmaz. Bu yüzden sürecin her adımını birlikte yönetiyoruz.
           </p>
           <ul>
             <li><Check size={16} /> Küçük partiler halinde kontrollü kavrum</li>
