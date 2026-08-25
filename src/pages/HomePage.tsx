@@ -221,8 +221,8 @@ export const HomePage: React.FC = () => {
       <section className="freshness-story mx-auto my-20 grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2rem] lg:grid-cols-12 lg:gap-14">
         <div className="scene-card freshness-system relative min-h-[430px] lg:col-span-5 lg:min-h-[560px]">
           <div className="freshness-system__header">
-            <span>BREMA TAZELİK SİSTEMİ</span>
-            <ShieldCheck size={21} />
+            <span>BREMA COFFEE · ÜRETİM STANDARDI</span>
+            <b>STD. 01—03</b>
           </div>
 
           <div className="freshness-system__stack">
@@ -241,17 +241,17 @@ export const HomePage: React.FC = () => {
           </div>
 
           <div className="freshness-system__footer">
-            <small>TEK BİR AMAÇ</small>
-            <strong>Aromayı olduğu gibi korumak.</strong>
+            <small>İSTANBUL · 2012'DEN BERİ</small>
+            <strong>Kontrollü süreç. Tutarlı kalite.</strong>
           </div>
         </div>
 
         <div className="freshness-copy px-1 py-4 lg:col-span-7 lg:px-10">
-          <span className="section-kicker">TAZELİĞİ TESADÜFE BIRAKMIYORUZ</span>
-          <h2>Aromayı kavuruyor,<br />tazeliği mühürlüyoruz.</h2>
+          <span className="section-kicker">ÜRETİM VE TAZELİK STANDARDI</span>
+          <h2>Her partide aynı<br />kalite disiplini.</h2>
           <p>
-            İyi çekirdek doğru kavrulmadığında, doğru kavrum da iyi korunmadığında
-            lezzet fincana ulaşmaz. Bu yüzden sürecin her adımını birlikte yönetiyoruz.
+            Kavrum, dinlendirme, kalite kontrol ve paketleme adımlarını tek bir üretim
+            standardı içinde yönetiyor; her partiyi aynı dikkatle hazırlıyoruz.
           </p>
           <ul>
             <li><Check size={16} /> Küçük partiler halinde kontrollü kavrum</li>

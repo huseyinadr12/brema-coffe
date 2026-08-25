@@ -136,31 +136,6 @@ body {
   background: rgba(224, 141, 96, 0.12);
 }
 
-.custom-cursor.is-label .custom-cursor__dot {
-  opacity: 0;
-}
-
-.custom-cursor.is-label .custom-cursor__ring {
-  width: auto;
-  min-width: 4.25rem;
-  height: 2.25rem;
-  padding: 0 0.85rem;
-  border-color: rgba(224, 141, 96, 0.72);
-  color: #fffaf3;
-  background: rgba(23, 50, 41, 0.94);
-  box-shadow: 0 10px 26px rgba(15, 35, 28, 0.24);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-}
-
-.custom-cursor.is-label .custom-cursor__ring > span {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.58rem;
-  font-weight: 800;
-  letter-spacing: 0.14em;
-  white-space: nowrap;
-}
-
 .custom-cursor.is-pressed .custom-cursor__ring {
   opacity: 0.58;
 }
@@ -999,6 +974,14 @@ body {
   letter-spacing: 0.2em;
 }
 
+.freshness-system__header b {
+  color: rgba(255, 249, 240, 0.48);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.54rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
 .freshness-system__stack {
   display: grid;
   gap: 0.75rem;
@@ -1012,32 +995,30 @@ body {
   grid-template-columns: 2.5rem minmax(0, 1fr);
   align-items: center;
   gap: 0.85rem;
-  padding: 1rem 1.1rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 18px 34px rgba(5, 18, 13, 0.16);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 1.05rem 0;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
   transform-style: preserve-3d;
 }
 
 .freshness-system__step:nth-child(1) {
-  margin-right: 1.6rem;
-  transform: perspective(1100px) rotateY(2.5deg) translateZ(18px);
+  margin: 0;
+  transform: none;
 }
 
 .freshness-system__step:nth-child(2) {
-  margin-left: 1rem;
-  margin-right: 0.6rem;
-  border-color: rgba(239, 177, 126, 0.34);
-  background: rgba(224, 141, 96, 0.12);
-  transform: perspective(1100px) translateZ(38px);
+  margin: 0;
+  border-color: rgba(255, 255, 255, 0.12);
+  background: transparent;
+  transform: none;
 }
 
 .freshness-system__step:nth-child(3) {
-  margin-left: 1.6rem;
-  transform: perspective(1100px) rotateY(-2.5deg) translateZ(18px);
+  margin: 0;
+  transform: none;
 }
 
 .freshness-system__step > span {
@@ -1377,6 +1358,37 @@ body {
   .taste-card:hover,
   .choice-card:hover {
     transform: none;
+  }
+}
+
+/* Restrained corporate finish: depth comes from entry choreography, not decoration. */
+.home-page .btn-luxury {
+  border-radius: 0.75rem;
+}
+
+.home-page .scene-card,
+.home-page .taste-finder,
+.home-page .freshness-story,
+.home-page .final-conversion {
+  border-radius: 1.25rem;
+}
+
+.home-page .depth-card,
+.home-page .taste-card,
+.home-page .choice-card {
+  border-radius: 0.9rem;
+}
+
+.home-page .taste-card::after,
+.home-page .choice-card::after {
+  opacity: 0.62;
+}
+
+@media (hover: hover) {
+  .home-page .depth-card:hover,
+  .home-page .taste-card:hover,
+  .home-page .choice-card:hover {
+    transform: perspective(1300px) translate3d(0, -4px, 18px) rotateX(0.5deg);
   }
 }
 

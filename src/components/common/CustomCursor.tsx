@@ -1,14 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-type CursorMode = 'default' | 'interactive' | 'label';
+type CursorMode = 'default' | 'interactive';
 
 interface CursorView {
   visible: boolean;
   mode: CursorMode;
-  text: string;
 }
 
-const INITIAL_VIEW: CursorView = { visible: false, mode: 'default', text: '' };
+const INITIAL_VIEW: CursorView = { visible: false, mode: 'default' };
 
 export const CustomCursor: React.FC = () => {
   const dotRef = useRef<HTMLSpanElement>(null);
@@ -30,8 +29,7 @@ export const CustomCursor: React.FC = () => {
     const updateView = (next: CursorView) => {
       setView((current) =>
         current.visible === next.visible &&
-        current.mode === next.mode &&
-        current.text === next.text
+        current.mode === next.mode
           ? current
           : next
       );
@@ -56,14 +54,11 @@ export const CustomCursor: React.FC = () => {
         return;
       }
 
-      const cursorHost = target?.closest<HTMLElement>('[data-cursor]');
-      const cursorText = cursorHost?.dataset.cursor?.trim() ?? '';
       const interactive = Boolean(target?.closest('a, button, [role="button"]'));
 
       updateView({
         visible: true,
-        mode: cursorText ? 'label' : interactive ? 'interactive' : 'default',
-        text: cursorText,
+        mode: interactive ? 'interactive' : 'default',
       });
     };
 
@@ -105,9 +100,7 @@ export const CustomCursor: React.FC = () => {
       aria-hidden="true"
     >
       <span ref={dotRef} className="custom-cursor__dot" />
-      <span ref={ringRef} className="custom-cursor__ring">
-        {view.mode === 'label' && <span>{view.text}</span>}
-      </span>
+      <span ref={ringRef} className="custom-cursor__ring" />
     </div>
   );
 };
