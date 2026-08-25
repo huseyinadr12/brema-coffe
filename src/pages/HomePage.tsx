@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { Stage3D } from '../components/canvas/Stage3D';
 import { CoffeeBean3D } from '../components/canvas/CoffeeBean3D';
-import { EspressoCup3D } from '../components/canvas/EspressoCup3D';
 import { useAudio } from '../context/AudioContext';
 
 const qualitySteps = [
@@ -220,23 +219,30 @@ export const HomePage: React.FC = () => {
       </section>
 
       <section className="freshness-story mx-auto my-20 grid max-w-7xl items-center gap-10 overflow-hidden rounded-[2rem] lg:grid-cols-12 lg:gap-14">
-        <div className="scene-card freshness-scene relative min-h-[360px] lg:col-span-5 lg:min-h-[560px]">
-          <Stage3D
-            cameraPosition={[0, 1.0, 3.4]}
-            shadowY={-0.92}
-            shadowScale={5}
-            shadowOpacity={0.5}
-            mood="studio"
-            label="Kremalı Brema espressosunun 3B fincan görünümü"
-          >
-            <EspressoCup3D scale={1.15} position={[0, -0.3, 0]} />
-          </Stage3D>
-          <div className="freshness-scene__caption">
-            <span>ÖRNEK FİNCAN PROFİLİ</span>
-            <div className="freshness-scene__profile">
-              <small>ORTA KAVRUM</small>
-              <b>Çikolata · Karamel · Dengeli gövde</b>
+        <div className="scene-card freshness-system relative min-h-[430px] lg:col-span-5 lg:min-h-[560px]">
+          <div className="freshness-system__header">
+            <span>BREMA TAZELİK SİSTEMİ</span>
+            <ShieldCheck size={21} />
+          </div>
+
+          <div className="freshness-system__stack">
+            <div className="freshness-system__step">
+              <span>01</span>
+              <div><small>KAVRUM</small><b>Küçük partilerde kontrollü profil</b></div>
             </div>
+            <div className="freshness-system__step">
+              <span>02</span>
+              <div><small>KONTROL</small><b>Dinlendirme ve kalite onayı</b></div>
+            </div>
+            <div className="freshness-system__step">
+              <span>03</span>
+              <div><small>PAKETLEME</small><b>Tek yönlü valfle koruma</b></div>
+            </div>
+          </div>
+
+          <div className="freshness-system__footer">
+            <small>TEK BİR AMAÇ</small>
+            <strong>Aromayı olduğu gibi korumak.</strong>
           </div>
         </div>
 
